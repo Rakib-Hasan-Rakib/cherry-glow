@@ -48,12 +48,28 @@ router.post("/addProduct", verifyAdmin, upload.single("image"), async (req, res)
 });
 
 
-/* READ ALL PRODUCTS */
-router.get("/allProduct", verifyAdmin, async (req, res) => {
-  const db = getDB();
-  const products = await db.collection("products").find().toArray();
-  res.json(products);
+/* READ ALL PRODUCTS FOR ADMIN */
+router.get("/allProduct", async (req, res) => {
+  try {
+    const db = getDB();
+    const { search } = req.query;
+
+    const filter = search ? { name: { $regex: search, $options: "i" } } : {};
+
+    const products = await db
+      .collection("products")
+      .find(filter)
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    res.status(200).json(products);
+  } catch (error) {
+    console.error("Fetch Products Error:", error);
+    res.status(500).json({ message: "Failed to fetch products" });
+  }
 });
+
+
 
 /* UPDATE PRODUCT */
 router.put("/updateProduct/:id", verifyAdmin, upload.single("image"), async (req, res) => {

@@ -5,6 +5,7 @@ import Footer from "@/components/layout/Footer";
 import Messenger from "@/components/shared/Messenger";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
+import { Toaster } from "sonner";
 
 export const metadata = {
   title: "Cherry Glow",
@@ -20,6 +21,7 @@ export default function RootLayout({ children }) {
             <CartProvider>
               <Navbar />
               {children}
+              <Toaster richColors position="top-right" />
               <Messenger />
             </CartProvider>
             <Footer />

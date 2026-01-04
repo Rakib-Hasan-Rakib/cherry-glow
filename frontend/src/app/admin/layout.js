@@ -11,9 +11,12 @@ export default function AdminLayout({ children }) {
   useEffect(() => {
     const checkAdmin = async () => {
       const user = auth.currentUser;
-      if (!user) return router.push("/login");
+      if (!user) {
+        router.push("/login");
+        return;
+      }
 
-      const token = await auth.currentUser.getIdToken(true);
+      const token = await user.getIdToken(true);
 
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/admin/check`,
@@ -22,16 +25,21 @@ export default function AdminLayout({ children }) {
         }
       );
 
-      if (!res.ok) router.push("/");
+      if (!res.ok) {
+        router.push("/");
+      }
     };
 
     checkAdmin();
-  }, []);
+  }, [router]);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-background text-foreground">
+      {/* Sidebar */}
       <Sidebar />
-      <main className="flex-1 p-6 bg-gray-50">{children}</main>
+
+      {/* Main Content */}
+      <main className="flex-1 p-6 bg-muted/40">{children}</main>
     </div>
   );
 }
