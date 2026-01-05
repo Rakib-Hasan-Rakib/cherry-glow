@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const CATEGORIES = ["NONE", "CLEANSER", "TONER", "SERUMS", "EYE CARE", "MOISTURIZER", "SUNSCREEN", "MASK", "OIL"];
+const CATEGORIES = ["NONE", "CLEANSER", "TONER", "SERUM", "EYE CARE", "MOISTURIZER", "SUNSCREEN", "MASK", "OIL"];
 const SECTIONS = ["featured", "new", "best"];
 const UNITS = ["ml", "g"];
 
