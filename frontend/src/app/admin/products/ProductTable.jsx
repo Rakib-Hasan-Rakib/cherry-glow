@@ -38,7 +38,7 @@ export default function ProductTable({ products, loading, onEdit, onDelete }) {
               ))
             : products.map((p) => (
                 <TableRow key={p._id} className="hover:bg-muted/50">
-                  <TableCell className="font-medium">{p.name}</TableCell>
+                  <TableCell className="font-medium capitalize">{p.name}</TableCell>
 
                   <TableCell>
                     <Image
@@ -57,7 +57,7 @@ export default function ProductTable({ products, loading, onEdit, onDelete }) {
                       <Button
                         size="icon"
                         variant="secondary"
-                        onClick={() => onEdit(p)}
+                        onClick={() => onEdit(p)} className="cursor-pointer"
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -65,7 +65,7 @@ export default function ProductTable({ products, loading, onEdit, onDelete }) {
                       <Button
                         size="icon"
                         variant="destructive"
-                        onClick={() => onDelete(p._id)}
+                        onClick={() => onDelete(p._id)} className="cursor-pointer"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

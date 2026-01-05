@@ -84,6 +84,7 @@ export default function ProductManagement() {
       toast.error(err.message || "Delete failed");
     }
   };
+  console.log("products:", products);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
@@ -94,15 +95,15 @@ export default function ProductManagement() {
 
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => setEditingProduct(null)} className="gap-2">
+              <Button onClick={() => setEditingProduct(null)} className="gap-2 bg-pink-500 hover:bg-pink-600 text-primary-foreground cursor-pointer">
                 <Plus className="h-4 w-4" />
                 Add Product
               </Button>
             </DialogTrigger>
 
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-lg w-full">
               <DialogHeader>
-                <DialogTitle>
+                <DialogTitle className="text-lg font-semibold text-center">
                   {editingProduct ? "Edit Product" : "Add Product"}
                 </DialogTitle>
               </DialogHeader>

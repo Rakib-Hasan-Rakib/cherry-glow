@@ -29,13 +29,26 @@ router.post("/addProduct", verifyAdmin, upload.single("image"), async (req, res)
     }
 
     const product = {
-      name: req.body.name,
+      name: req.body.name?.trim(),
       price: Number(req.body.price),
       category: req.body.category,
-      section: req.body.section,
-      stock: Number(req.body.stock),
+      section: req.body.section || "featured",
+      // Inventory
+      stock: Number(req.body.stock) || 0,
+      // Quantity (ml / g)
+      quantity: req.body.quantity ? Number(req.body.quantity) : null,
+      quantityUnit: req.body.quantityUnit || "ml",
+      // Product details
+      brand: req.body.brand || "",
+      description: req.body.description || "",
+      useCase: req.body.useCase || "",
+      // Pricing
+      discount: req.body.discount ? Number(req.body.discount) : 0,
+      // Media
       image: imageUrl,
       imagePublicId: public_id,
+
+      // Meta
       createdAt: new Date(),
     };
 
