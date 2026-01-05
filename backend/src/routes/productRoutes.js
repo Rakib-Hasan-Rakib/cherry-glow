@@ -146,22 +146,32 @@ router.delete("/deleteProduct/:id", verifyAdmin, async (req, res) => {
 router.get("/allProduct/public", async (req, res) => {
   try {
     const db = getDB();
+    const { search = "", category = "All" } = req.query;
+
+    const query = {};
+
+    // Server-side search (product name)
+    if (search) {
+      query.name = { $regex: search, $options: "i" };
+    }
+
+    // Category filter (do not force NONE)
+    if (category !== "All") {
+      query.category = category;
+    }
 
     const products = await db
       .collection("products")
-      .find(
-        {},
-        {
-          projection: {
-            name: 1,
-            price: 1,
-            category: 1,
-            image: 1,
-            section: 1,
-            stock: 1,
-          },
-        }
-      )
+      .find(query, {
+        projection: {
+          name: 1,
+          price: 1,
+          category: 1,
+          image: 1,
+          section: 1,
+          stock: 1,
+        },
+      })
       .sort({ createdAt: -1 })
       .toArray();
 
@@ -171,6 +181,7 @@ router.get("/allProduct/public", async (req, res) => {
     res.status(500).json({ message: "Failed to load products" });
   }
 });
+
 
 // GET featured products (public)
 router.get("/products/featured", async (req, res) => {
