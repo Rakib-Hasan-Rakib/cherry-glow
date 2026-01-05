@@ -68,7 +68,7 @@ export default function BestSoldProducts() {
 
             {/* Secondary Products */}
             <div className="col-span-2 grid grid-cols-2 gap-6">
-              {bestSoldProducts.slice(1).map((product) => (
+              {bestSoldProducts.slice(1,5).map((product, index) => (
                 <motion.div
                   key={product?._id}
                   initial={{ opacity: 0, y: 20 }}
@@ -130,7 +130,7 @@ export default function BestSoldProducts() {
         )}
         {/* Scroll Products */}
         {bestSoldProducts.length > 1 && (
-          <div className="flex gap-4 overflow-x-auto pb-2">
+          <div className="md:hidden flex gap-4 overflow-x-auto pb-2">
             {bestSoldProducts.slice(1).map((product) => (
               <div
                 key={product._id}
