@@ -3,63 +3,66 @@ import { getDB } from "../config/db.js";
 import { verifyAdmin } from "../middlewares/verifyAdmin.js";
 import { ObjectId } from "mongodb";
 import cloudinary from "../config/cloudinary.js";
-import multer from "multer";
 import upload from "../middlewares/upload.js";
 
 const router = express.Router();
 
 /* CREATE PRODUCT */
-router.post("/addProduct", verifyAdmin, upload.single("image"), async (req, res) => {
-  try {
-    const db = getDB();
+router.post(
+  "/addProduct",
+  verifyAdmin,
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      const db = getDB();
 
-    let imageUrl = "";
-    let public_id = "";
+      let imageUrl = "";
+      let public_id = "";
 
-    if (req.file) {
-      const uploadResult = await cloudinary.uploader.upload(
-        `data:${req.file.mimetype};base64,${req.file.buffer.toString(
-          "base64"
-        )}`,
-        { folder: "cherry-glow/products", format: "jpg" }
-      );
+      if (req.file) {
+        const uploadResult = await cloudinary.uploader.upload(
+          `data:${req.file.mimetype};base64,${req.file.buffer.toString(
+            "base64"
+          )}`,
+          { folder: "cherry-glow/products", format: "jpg" }
+        );
 
-      imageUrl = uploadResult.secure_url;
-      public_id = uploadResult.public_id;
+        imageUrl = uploadResult.secure_url;
+        public_id = uploadResult.public_id;
+      }
+
+      const product = {
+        name: req.body.name?.trim(),
+        price: Number(req.body.price),
+        category: req.body.category,
+        section: req.body.section || "featured",
+        // Inventory
+        stock: Number(req.body.stock) || 0,
+        // Quantity (ml / g)
+        quantity: req.body.quantity ? Number(req.body.quantity) : null,
+        quantityUnit: req.body.quantityUnit || "ml",
+        // Product details
+        brand: req.body.brand || "",
+        description: req.body.description || "",
+        useCase: req.body.useCase || "",
+        // Pricing
+        discount: req.body.discount ? Number(req.body.discount) : 0,
+        // Media
+        image: imageUrl,
+        imagePublicId: public_id,
+
+        // Meta
+        createdAt: new Date(),
+      };
+
+      const result = await db.collection("products").insertOne(product);
+      res.status(201).json(result);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Product creation failed" });
     }
-
-    const product = {
-      name: req.body.name?.trim(),
-      price: Number(req.body.price),
-      category: req.body.category,
-      section: req.body.section || "featured",
-      // Inventory
-      stock: Number(req.body.stock) || 0,
-      // Quantity (ml / g)
-      quantity: req.body.quantity ? Number(req.body.quantity) : null,
-      quantityUnit: req.body.quantityUnit || "ml",
-      // Product details
-      brand: req.body.brand || "",
-      description: req.body.description || "",
-      useCase: req.body.useCase || "",
-      // Pricing
-      discount: req.body.discount ? Number(req.body.discount) : 0,
-      // Media
-      image: imageUrl,
-      imagePublicId: public_id,
-
-      // Meta
-      createdAt: new Date(),
-    };
-
-    const result = await db.collection("products").insertOne(product);
-    res.status(201).json(result);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Product creation failed" });
   }
-});
-
+);
 
 /* READ ALL PRODUCTS FOR ADMIN */
 router.get("/allProduct", async (req, res) => {
@@ -82,46 +85,51 @@ router.get("/allProduct", async (req, res) => {
   }
 });
 
-
-
 /* UPDATE PRODUCT */
-router.put("/updateProduct/:id", verifyAdmin, upload.single("image"), async (req, res) => {
-  try {
-    const db = getDB();
-    const updateData = {
-      name: req.body.name,
-      price: Number(req.body.price),
-      category: req.body.category,
-      section: req.body.section,
-      stock: Number(req.body.stock),
-    };
+router.put(
+  "/updateProduct/:id",
+  verifyAdmin,
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      const db = getDB();
+      const updateData = {
+        name: req.body.name,
+        price: Number(req.body.price),
+        category: req.body.category,
+        section: req.body.section,
+        stock: Number(req.body.stock),
+      };
 
-    if (req.file) {
-      const uploadResult = await cloudinary.uploader.upload(
-        `data:${req.file.mimetype};base64,${req.file.buffer.toString(
-          "base64"
-        )}`,
-        { folder: "cherry-glow/products", format: "jpg" }
-      );
-      updateData.image = uploadResult.secure_url;
+      if (req.file) {
+        const uploadResult = await cloudinary.uploader.upload(
+          `data:${req.file.mimetype};base64,${req.file.buffer.toString(
+            "base64"
+          )}`,
+          { folder: "cherry-glow/products", format: "jpg" }
+        );
+        updateData.image = uploadResult.secure_url;
+      }
+
+      await db
+        .collection("products")
+        .updateOne({ _id: new ObjectId(req.params.id) }, { $set: updateData });
+
+      res.json({ message: "Product updated" });
+    } catch (err) {
+      res.status(500).json({ message: "Update failed" });
     }
-
-    await db
-      .collection("products")
-      .updateOne({ _id: new ObjectId(req.params.id) }, { $set: updateData });
-
-    res.json({ message: "Product updated" });
-  } catch (err) {
-    res.status(500).json({ message: "Update failed" });
   }
-});
+);
 
 /* DELETE PRODUCT */
 router.delete("/deleteProduct/:id", verifyAdmin, async (req, res) => {
   const db = getDB();
   const { id } = req.params;
 
-  const product = await db.collection("products").findOne({ _id: new ObjectId(id) });
+  const product = await db
+    .collection("products")
+    .findOne({ _id: new ObjectId(id) });
 
   if (!product) {
     return res.status(404).json({ message: "Product not found" });
@@ -141,7 +149,6 @@ router.delete("/deleteProduct/:id", verifyAdmin, async (req, res) => {
 
   res.json({ message: "Product deleted successfully" });
 });
-
 
 router.get("/allProduct/public", async (req, res) => {
   try {
@@ -170,6 +177,12 @@ router.get("/allProduct/public", async (req, res) => {
           image: 1,
           section: 1,
           stock: 1,
+          brand: 1,
+          quantity: 1,
+          quantityUnit: 1,
+          description: 1,
+          discount: 1,
+          useCase: 1
         },
       })
       .sort({ createdAt: -1 })
@@ -179,6 +192,27 @@ router.get("/allProduct/public", async (req, res) => {
   } catch (error) {
     console.error("Public products error:", error);
     res.status(500).json({ message: "Failed to load products" });
+  }
+});
+
+// GET single product (public)
+router.get("/product/:id/public", async (req, res) => {
+  try {
+    const db = getDB();
+    const { id } = req.params;
+
+    const product = await db
+      .collection("products")
+      .findOne({ _id: new ObjectId(id) });
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.json(product);
+  } catch (error) {
+    console.error("Product details error:", error);
+    res.status(500).json({ message: "Failed to load product" });
   }
 });
 
@@ -204,6 +238,5 @@ router.get("/products/best", async (req, res) => {
 
   res.json(products);
 });
-
 
 export default router;

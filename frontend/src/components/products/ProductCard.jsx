@@ -1,10 +1,9 @@
-export default function ProductCard({ product, onAddToCart, onOpen }) {
+import Link from "next/link";
+
+export default function ProductCard({ product, onAddToCart }) {
   const { image, name, price, stock } = product;
   return (
-    <div
-      onClick={() => onOpen(product)}
-      className="cursor-pointer rounded-xl bg-white dark:bg-gray-800 p-4 shadow-sm hover:shadow-md transition"
-    >
+    <div className="cursor-pointer rounded-xl bg-white dark:bg-gray-800 p-4 shadow-sm hover:shadow-md transition">
       <img
         src={image}
         alt={name}
@@ -28,15 +27,20 @@ export default function ProductCard({ product, onAddToCart, onOpen }) {
       </div>
 
       {/* Stop click bubbling for Add to Cart */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onAddToCart(product);
-        }}
-        className="mt-3 w-full rounded-lg bg-pink-500 py-2 text-white hover:bg-pink-600"
-      >
-        Add to Cart
-      </button>
+      <div className="flex gap-4">
+        <button className="mt-3 inline-block w-full text-center rounded-full border border-pink-500 hover:bg-pink-600 hover:text-white transition py-2 text-sm font-medium hover:bg-pink-600 transition">
+          <Link href={`/products/${product._id}`}>View Details</Link>
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddToCart(product);
+          }}
+          className="mt-3 w-full rounded-full cursor-pointer bg-pink-500 py-2 text-white hover:bg-pink-600 text-sm font-medium transition"
+        >
+          Add to Cart
+        </button>
+      </div>
     </div>
   );
 }

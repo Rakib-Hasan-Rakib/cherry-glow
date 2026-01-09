@@ -115,6 +115,23 @@ export default function ContactPage() {
           </p>
         </div>
       </section>
+      <section className="w-full py-12">
+        <div className="max-w-6xl mx-auto px-4">
+          <h2 className="text-2xl font-semibold mb-6">Our Location</h2>
+
+          <div className="w-full h-[350px] rounded-xl overflow-hidden shadow-md">
+            <iframe
+              title="Cherry Glow Location"
+              src="https://www.google.com/maps?q=Seoul,South%20Korea&output=embed"
+              width="100%"
+              height="100%"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              className="border-0"
+            />
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

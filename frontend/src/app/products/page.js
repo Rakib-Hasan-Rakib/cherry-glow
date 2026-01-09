@@ -75,7 +75,7 @@ export default function ProductsPage() {
     return () => controller.abort();
   }, [debouncedSearch, category]);
 
-
+console.log(products);
   return (
     <div className="bg-pink-50 min-h-screen">
       {/* Hero */}
@@ -134,16 +134,9 @@ export default function ProductsPage() {
                 key={product._id}
                 product={product}
                 onAddToCart={addToCart}
-                onOpen={setSelectedProduct}
               />
             ))}
       </section>
-
-      <ProductModal
-        product={selectedProduct}
-        onClose={() => setSelectedProduct(null)}
-        onAddToCart={addToCart}
-      />
     </div>
   );
 }

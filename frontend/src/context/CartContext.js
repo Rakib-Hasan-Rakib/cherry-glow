@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 const CartContext = createContext();
 
@@ -38,7 +39,9 @@ export function CartProvider({ children }) {
       }
 
       return [...prev, { ...product, quantity: 1 }];
+      
     });
+    toast.success("Product added to cart");
   };
 
   const updateQuantity = (id, type) => {
