@@ -54,13 +54,13 @@ export default function ProductDetailsPage() {
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.4 }}
-          className="relative w-full h-[420px] rounded-2xl overflow-hidden shadow-lg"
+          className="relative w-full h-[420px] rounded-2xl overflow-hidden"
         >
           <Image
             src={product.image}
             alt={product.name}
             fill
-            className="object-cover"
+            className="object-contain"
             priority
           />
         </motion.div>

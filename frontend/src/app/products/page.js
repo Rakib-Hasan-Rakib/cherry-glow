@@ -2,11 +2,12 @@
 
 import HeroImageSlider from "@/components/products/HeroImageSlider";
 import ProductCard from "@/components/products/ProductCard";
-import ProductModal from "@/components/products/ProductModal";
 import SkeletonCard from "@/components/products/SkeletonCard";
 import { Input } from "@/components/ui/input";
 import { useCart } from "@/context/CartContext";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { X } from "lucide-react";
 
 const CATEGORIES = [
   "All",
@@ -22,13 +23,14 @@ const CATEGORIES = [
 
 export default function ProductsPage() {
   const { addToCart } = useCart();
+  const searchParams = useSearchParams();
+  const urlCategory = searchParams.get("category") || "All";
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [category, setCategory] = useState("All");
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [category, setCategory] = useState(urlCategory);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -75,7 +77,6 @@ export default function ProductsPage() {
     return () => controller.abort();
   }, [debouncedSearch, category]);
 
-console.log(products);
   return (
     <div className="bg-pink-50 min-h-screen">
       {/* Hero */}
@@ -94,12 +95,14 @@ console.log(products);
       </section>
 
       {/* Search */}
-      <section className="max-w-7xl mx-auto px-6 mt-8">
+      <section className="max-w-7xl mx-auto px-6 mt-8 relative">
         <Input
           placeholder="Search products..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)} className="w-full md:w-1/2 md:py-5 focus:ring-2 focus:outline-pink-300"
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full md:w-1/2 md:py-5 focus:ring-2 focus:outline-pink-300"
         />
+        <X onClick={()=>setSearch("")} className="absolute right-6 md:right-1/2 top-1/2 transform -translate-y-1/2 pr-2 cursor-pointer text-gray-500 hover:text-gray-700" />
       </section>
 
       {/* Categories */}
@@ -109,7 +112,7 @@ console.log(products);
             <button
               key={cat}
               onClick={() => setCategory(cat)}
-              className={`px-5 py-2 rounded-full border whitespace-nowrap
+              className={`px-5 py-2 rounded-full border whitespace-nowrap crursor-pointer
                 ${
                   category === cat
                     ? "bg-pink-500 text-white border-pink-500"
@@ -124,7 +127,7 @@ console.log(products);
 
       {/* Products */}
       <section
-        className="grid md:grid-cols-3 lg:grid-cols-4 gap-6 py-10 max-w-7xl mx-auto px-6"
+        className="grid md:grid-cols-3 lg:grid-cols-4 gap-6 items-stretch max-w-7xl mx-auto px-6 my-10"
         id="products"
       >
         {loading
