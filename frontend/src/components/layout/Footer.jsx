@@ -1,6 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Facebook, Instagram, Twitter, TwitterIcon, Youtube } from "lucide-react";
+import {
+  Facebook,
+  Instagram,
+  Twitter,
+  TwitterIcon,
+  Youtube,
+} from "lucide-react";
 
 export default function Footer() {
   return (
@@ -51,7 +57,9 @@ export default function Footer() {
 
           {/* Support */}
           <div>
-            <h4 className="mb-4 text-sm font-semibold uppercase">Support</h4>
+            <h4 className="mb-4 text-sm font-semibold uppercase">
+              Support & Legal
+            </h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 <Link href="/faq" className="hover:text-foreground">
@@ -68,20 +76,16 @@ export default function Footer() {
                   Customer Support
                 </Link>
               </li>
-            </ul>
-          </div>
-
-          {/* Legal */}
-          <div>
-            <h4 className="mb-4 text-sm font-semibold uppercase">Legal</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 <Link href="/privacy-policy" className="hover:text-foreground">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="hover:text-foreground">
+                <Link
+                  href="/terms"
+                  className="footer-link"
+                >
                   Terms & Conditions
                 </Link>
               </li>
@@ -99,7 +103,8 @@ export default function Footer() {
           <div className="flex gap-4">
             <Link
               href="https://www.facebook.com/profile.php?id=61584259252264"
-              aria-label="Facebook" target="_blank"
+              aria-label="Facebook"
+              target="_blank"
             >
               <Facebook className="h-5 w-5 text-muted-foreground hover:text-foreground" />
             </Link>

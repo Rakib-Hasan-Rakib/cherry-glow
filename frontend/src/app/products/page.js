@@ -77,6 +77,7 @@ export default function ProductsPage() {
     return () => controller.abort();
   }, [debouncedSearch, category]);
 
+
   return (
     <div className="bg-pink-50 min-h-screen">
       {/* Hero */}

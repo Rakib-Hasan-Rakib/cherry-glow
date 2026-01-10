@@ -152,5 +152,7 @@
 .cursor {
   cursor: pointer;
 }
-
+.footer-link:hover {
+  text-decoration: underline;
+}
 
