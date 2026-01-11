@@ -5,7 +5,6 @@ import Image from "next/image";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import CheckoutModal from "@/components/CheckoutModal";
 import { useState,useMemo } from "react";
-import DeliveryOptions from "./DeliveryOptions";
 
 export default function CartPage() {
   const { cart, updateQuantity, removeFromCart } = useCart();

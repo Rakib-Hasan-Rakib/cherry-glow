@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export default function ProductCard({ product, onAddToCart }) {
@@ -11,11 +12,16 @@ export default function ProductCard({ product, onAddToCart }) {
         {discount > 0 && `${discount}% OFF`}
       </span>
       {/* Image */}
-      <img
-        src={image}
-        alt={name}
-        className="h-48 w-full rounded-lg object-contain"
-      />
+      {/* <Image src={image} alt={name} fill className="object-cover" priority /> */}
+      <div className="relative w-full h-48 md:h-56 lg:h-64 mb-4">
+        <Image
+          src={image}
+          alt={name}
+          fill
+          className="object-contain"
+          priority
+        />
+      </div>    
 
       {/* Content */}
       <div className="flex flex-1 flex-col">
