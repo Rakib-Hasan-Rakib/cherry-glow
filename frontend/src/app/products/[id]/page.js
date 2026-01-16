@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
+import { calculateFinalPrice } from "@/lib/pricing";
 
 export default function ProductDetailsPage() {
   const { id } = useParams();
@@ -15,7 +16,6 @@ export default function ProductDetailsPage() {
 
   useEffect(() => {
     const controller = new AbortController();
-    
 
     const fetchProduct = async () => {
       try {
@@ -42,6 +42,20 @@ export default function ProductDetailsPage() {
   if (!product)
     return <p className="text-center py-20 text-gray-500">Product not found</p>;
 
+  const {
+    image,
+    name,
+    price,
+    discount,
+    brand,
+    category,
+    quantity,
+    quantityUnit,
+    description,
+    useCase,
+  } = product;
+  const finalPrice = calculateFinalPrice(price, discount);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -57,8 +71,8 @@ export default function ProductDetailsPage() {
           className="relative w-full h-[420px] rounded-2xl overflow-hidden"
         >
           <Image
-            src={product.image}
-            alt={product.name}
+            src={image}
+            alt={name}
             fill
             className="object-contain"
             priority
@@ -72,45 +86,47 @@ export default function ProductDetailsPage() {
           transition={{ duration: 0.4, delay: 0.1 }}
           className="space-y-4"
         >
-          <p className="text-sm text-pink-500 font-bold uppercase">
-            {product.brand}
-          </p>
+          <p className="text-sm text-pink-500 font-bold uppercase">{brand}</p>
 
-          <h1 className="text-3xl font-bold capitalize">{product.name}</h1>
+          <h1 className="text-3xl font-bold capitalize">{name}</h1>
 
           <p>
             <span className="font-bold">Category:</span>{" "}
-            <span className="font-medium">{product.category}</span>
+            <span className="font-medium">{category}</span>
           </p>
 
           <p className="text-2xl font-semibold text-pink-600">
-            ৳ {product.price}
-            {product.discount > 0 && (
+            ৳ {finalPrice}
+            {discount > 0 && (
               <span className="ml-2 text-sm text-green-600">
-                ({product.discount}% OFF)
+                ({discount}% OFF)
               </span>
             )}
           </p>
 
           <p className="text-sm">
-            <span className="font-bold">Quantity:</span> {product.quantity} {product.quantityUnit}
+            <span className="font-bold">Quantity:</span> {quantity}{" "}
+            {quantityUnit}
           </p>
 
           <div className="pt-2">
             <h3 className="font-semibold mb-2">Description</h3>
             <p className="text-gray-600 leading-relaxed whitespace-pre-line">
-              {product.description}
+              {description}
             </p>
           </div>
 
           {product.useCase && (
             <div className="pt-2">
               <p className="whitespace-pre-line">
-                <span className="font-bold">Use Case:</span> {product.useCase}
+                <span className="font-bold">Use Case:</span> {useCase}
               </p>
             </div>
           )}
-          <Button onClick={() => addToCart(product)} className="bg-pink-600 hover:bg-pink-700 text-white py-2 px-6 rounded-full cursor-pointer">
+          <Button
+            onClick={() => addToCart(product)}
+            className="bg-pink-600 hover:bg-pink-700 text-white py-2 px-6 rounded-full cursor-pointer"
+          >
             Add to Cart
           </Button>
         </motion.div>

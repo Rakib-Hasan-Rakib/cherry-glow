@@ -6,7 +6,7 @@ import Link from "next/link";
 const categories = [
   { id: 1, name: "CLEANSER", image: "/categories/skin_care.jpg" },
   { id: 2, name: "TONER", image: "/categories/makeup.jpg" },
-  { id: 3, name: "SERUMS", image: "/categories/hair_care.jpg" },
+  { id: 3, name: "SERUM", image: "/categories/hair_care.jpg" },
   { id: 4, name: "EYE CARE", image: "/categories/fragrance.jpg" },
   { id: 5, name: "MOISTURIZER", image: "/categories/body_care.jpg" },
   { id: 6, name: "SUNSCREEN", image: "/categories/skin_care.jpg" },

@@ -4,15 +4,17 @@ import { useCart } from "@/context/CartContext";
 import Image from "next/image";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import CheckoutModal from "@/components/CheckoutModal";
-import { useState,useMemo } from "react";
+import { useState, useMemo } from "react";
+import CheckoutSuccessModal from "@/components/CheckoutSuccessModal";
 
 export default function CartPage() {
   const { cart, updateQuantity, removeFromCart } = useCart();
   const [open, setOpen] = useState(false);
-  const [deliveryArea, setDeliveryArea] =useState("outside");
+  const [deliveryArea, setDeliveryArea] = useState("outside");
+  const [successModal, setSuccessModal] = useState(false);
 
   const subtotal = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  
+
   const deliveryCharge = useMemo(() => {
     if (deliveryArea === "dhaka") return 70;
     if (deliveryArea === "outside") return 120;
@@ -144,7 +146,16 @@ export default function CartPage() {
         </div>
       )}
 
-      <CheckoutModal open={open} onClose={() => setOpen(false)} />
+      <CheckoutModal
+        open={open}
+        onClose={() => setOpen(false)}
+        successModal={successModal}
+        setSuccessModal={setSuccessModal}
+      />
+      <CheckoutSuccessModal
+        open={successModal}
+        onClose={() => setSuccessModal(false)}
+      />
     </div>
   );
 }

@@ -13,7 +13,7 @@ const CATEGORIES = [
   "All",
   "CLEANSER",
   "TONER",
-  "SERUMS",
+  "SERUM",
   "EYE CARE",
   "MOISTURIZER",
   "SUNSCREEN",

@@ -3,8 +3,14 @@
 import { useCart } from "@/context/CartContext";
 import { useState } from "react";
 import { X } from "lucide-react";
+import CheckoutSuccessModal from "./CheckoutSuccessModal";
 
-export default function CheckoutModal({ open, onClose }) {
+export default function CheckoutModal({
+  open,
+  onClose,
+  successModal,
+  setSuccessModal,
+}) {
   const { cart, clearCart } = useCart();
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
@@ -27,9 +33,13 @@ export default function CheckoutModal({ open, onClose }) {
     const data = await res.json();
 
     if (data.success) {
-      alert("Your order has been confirmed");
+      setSuccessModal(true);
       clearCart();
-      onClose();
+
+      // Close checkout AFTER success modal is visible
+      setTimeout(() => {
+        onClose();
+      }, 100);
     }
   };
 
@@ -75,6 +85,10 @@ export default function CheckoutModal({ open, onClose }) {
           Confirm Order
         </button>
       </div>
+      <CheckoutSuccessModal
+        open={successModal}
+        onClose={() => setSuccessModal(false)}
+      />
     </div>
   );
 }
