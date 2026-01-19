@@ -182,7 +182,7 @@ router.get("/allProduct/public", async (req, res) => {
           quantityUnit: 1,
           description: 1,
           discount: 1,
-          useCase: 1
+          useCase: 1,
         },
       })
       .sort({ createdAt: -1 })
@@ -215,7 +215,6 @@ router.get("/product/:id/public", async (req, res) => {
     res.status(500).json({ message: "Failed to load product" });
   }
 });
-
 
 // GET featured products (public)
 router.get("/products/featured", async (req, res) => {

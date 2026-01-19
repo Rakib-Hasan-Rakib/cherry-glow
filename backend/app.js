@@ -9,7 +9,11 @@ const app = express();
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://cherry-glow.vercel.app"],
+    origin: [
+      "http://localhost:3000",
+      "https://cherry-glow.vercel.app",
+      "https://cherryglowkorea.com",
+    ],
     credentials: true,
   })
 );
@@ -19,7 +23,6 @@ app.use("/api/auth", authRoutes);
 app.use("/admin", adminRoutes);
 app.use("/products", productRoutes);
 app.use("/orders", orderRoutes);
-
 
 app.get("/", (_, res) => {
   res.send("Cherry Glow API running");

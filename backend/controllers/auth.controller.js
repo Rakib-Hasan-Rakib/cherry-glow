@@ -3,9 +3,9 @@ import { getDB } from "../config/db.js";
 export const syncUser = async (req, res) => {
   try {
     const db = getDB();
-      const users = db.collection("users");
-      
-      const photo = req.firebaseUser.photoURL || req.firebaseUser.picture || "";
+    const users = db.collection("users");
+
+    const photo = req.firebaseUser.photoURL || req.firebaseUser.picture || "";
 
     const { uid, email, name, firebase } = req.firebaseUser;
 
