@@ -5,44 +5,56 @@ export const syncUser = async (req, res) => {
     const db = getDB();
     const users = db.collection("users");
 
-    const photo = req.firebaseUser.photoURL || req.firebaseUser.picture || "";
+    const firebaseUser = req.firebaseUser;
 
-    const { uid, email, name, firebase } = req.firebaseUser;
+    // ✅ Safe extraction
+    const uid = firebaseUser?.uid;
+    const email = firebaseUser?.email;
+    const name = firebaseUser?.name || "";
+    const provider = firebaseUser?.firebase?.sign_in_provider || "password";
 
-    // Check if user exists
+    // ✅ Handle photo safely
+    const photo = firebaseUser?.picture || firebaseUser?.photoURL || "";
+
+    // 🔍 Check existing user
     let user = await users.findOne({ uid });
 
     if (!user) {
-      // REGISTER (first time login)
-      user = {
+      // 🆕 REGISTER
+      const newUser = {
         uid,
         email,
-        name: name || "",
+        name,
         photoURL: photo,
-        provider: firebase?.sign_in_provider || "password",
+        provider,
         role: "user",
         createdAt: new Date(),
         updatedAt: new Date(),
       };
 
-      await users.insertOne(user);
+      await users.insertOne(newUser);
+
+      return res.status(200).json({
+        success: true,
+        user: newUser,
+      });
     } else {
-      // LOGIN (update last seen)
+      // 🔄 LOGIN (update user)
       await users.updateOne(
         { uid },
         {
           $set: {
             updatedAt: new Date(),
-            photoURL: picture || user.photoURL,
+            photoURL: photo || user.photoURL,
           },
-        }
+        },
       );
-    }
 
-    res.status(200).json({
-      success: true,
-      user,
-    });
+      return res.status(200).json({
+        success: true,
+        user: { ...user, photoURL: photo || user.photoURL },
+      });
+    }
   } catch (error) {
     console.error("Auth sync error:", error);
     res.status(500).json({ message: "Server error" });

@@ -6,10 +6,13 @@ import Image from "next/image";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { Eye, EyeOff } from "lucide-react";
+import axios from "axios";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 const avatars = {
   male: "/avatars/male.png",
@@ -19,11 +22,16 @@ const avatars = {
 export default function RegisterPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("from") || "/";
+
+  // ✅ unified redirect param
+  const redirectTo = searchParams.get("redirect")?.startsWith("/")
+    ? searchParams.get("redirect")
+    : "/";
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
   const [avatar, setAvatar] = useState("male");
 
   const [formData, setFormData] = useState({
@@ -39,39 +47,47 @@ export default function RegisterPage() {
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
 
     try {
-      // Firebase Auth
+      // 🔐 Firebase register
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         formData.email,
-        formData.password
+        formData.password,
       );
 
       const user = userCredential.user;
 
-      // Update Firebase profile with avatar
+      // 🧑 Update Firebase profile
       await updateProfile(user, {
         displayName: formData.name,
         photoURL: avatars[avatar],
       });
+      await user.reload();
 
-      // Sync with backend (MongoDB)
+      // 🎟️ Get token
       const token = await user.getIdToken();
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/sync`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
 
+      // 🔗 Sync with backend
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/sync`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      toast.success("Account created successfully 🎉");
       setSuccess("Account created successfully 🎉");
 
-      setTimeout(() => {
-        router.replace(redirectTo);
-      }, 1800);
-    } catch (error) {
-      alert(error.message);
+      // 🔄 Redirect
+      router.replace(redirectTo);
+    } catch (err) {
+      toast.error("Registration failed. Please check your details.");
+      setError(err.response?.data || err.message);
     } finally {
       setLoading(false);
     }
@@ -95,14 +111,22 @@ export default function RegisterPage() {
         </CardHeader>
 
         <CardContent>
+          {/* Success */}
           {success && (
             <div className="mb-4 rounded-lg bg-green-100 text-green-700 px-4 py-2 text-sm text-center">
               {success}
             </div>
           )}
 
+          {/* Error */}
+          {error && (
+            <div className="mb-4 rounded-lg bg-red-100 text-red-600 px-4 py-2 text-sm text-center">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleRegister} className="space-y-4">
-            {/* Avatar Selection */}
+            {/* Avatar */}
             <div>
               <Label>Choose Avatar</Label>
               <div className="mt-2 flex justify-center gap-6">
@@ -129,6 +153,7 @@ export default function RegisterPage() {
               </div>
             </div>
 
+            {/* Name */}
             <div>
               <Label>Full Name</Label>
               <Input
@@ -139,6 +164,7 @@ export default function RegisterPage() {
               />
             </div>
 
+            {/* Email */}
             <div>
               <Label>Email</Label>
               <Input
@@ -150,6 +176,7 @@ export default function RegisterPage() {
               />
             </div>
 
+            {/* Password */}
             <div>
               <Label>Password</Label>
               <div className="relative">
@@ -170,6 +197,7 @@ export default function RegisterPage() {
               </div>
             </div>
 
+            {/* Submit */}
             <Button
               type="submit"
               className="w-full rounded-xl"
@@ -178,11 +206,12 @@ export default function RegisterPage() {
               {loading ? "Creating account..." : "Register"}
             </Button>
 
+            {/* Login Redirect */}
             <p className="text-center text-sm text-muted-foreground">
               Already have an account?{" "}
               <span
                 className="cursor-pointer text-pink-600 hover:underline"
-                onClick={() => router.push(`/login?from=${redirectTo}`)}
+                onClick={() => router.push(`/login?redirect=${redirectTo}`)}
               >
                 Login
               </span>

@@ -21,12 +21,12 @@ export default function ProfileCard({ member }) {
       <h2 className="mt-4 text-xl font-semibold text-gray-900 dark:text-gray-100">
         {name}
       </h2>
-      <p className="text-sm text-pink-600 dark:text-pink-400">
+      <p className="text-sm text-pink-600 dark:text-pink-400 capitalize">
         {post}
       </p>
 
       {/* Personal Info */}
-      <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">
+      <p className="mt-3 text-sm text-gray-600 dark:text-gray-300 align-evenly">
         {desc}
       </p>
 

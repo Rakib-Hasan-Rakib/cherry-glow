@@ -13,43 +13,43 @@ const metadata = {
 const teamMembers = [
   {
     name: "Mirza Md Mozammel",
-    post: "Product Manager",
-    imgSrc: "/team members/mirza.jpg",
-    desc: "Clean beauty inspired by nature, crafted with science, and made to glow with confidence.",
+    post: "Founder & CEO",
+    imgSrc: "https://i.ibb.co/0RV4Xf36/mirza.jpg",
+    desc: "Sets the vision, makes strategic decisions, and oversees overall business growth and direction.",
     facebook: "https://www.facebook.com/mirza.mh.2025",
-    instagram: "https://instagram.com",
+    instagram: "https://www.instagram.com/mirzakorea517/",
   },
   {
     name: "Abdullah Al Fahad",
-    post: "Product Manager",
-    imgSrc: "/team members/fahad.jpg",
-    desc: "Clean beauty inspired by nature, crafted with science, and made to glow with confidence.",
+    post: "Product Manager & quality control",
+    imgSrc: "https://i.ibb.co/fdmgkwkD/fahad.jpg",
+    desc: "Manages product development while ensuring all products meet quality standards before delivery.",
     facebook: "https://www.facebook.com/megla.meglaaksh.5",
-    instagram: "https://instagram.com",
-  },
-  {
-    name: "Mohiuddin Sajjad",
-    post: "Product Manager",
-    imgSrc: "/team members/sajjad.jpg",
-    desc: "Clean beauty inspired by nature, crafted with science, and made to glow with confidence.",
-    facebook: "https://www.facebook.com/ahmed.sajjat.98",
-    instagram: "https://instagram.com",
-  },
-  {
-    name: "Rakibul Hasan",
-    post: "Product Manager",
-    imgSrc: "/team members/rakib.jpg",
-    desc: "Clean beauty inspired by nature, crafted with science, and made to glow with confidence.",
-    facebook: "https://www.facebook.com/rk.rakib.180625/",
     instagram: null,
   },
   {
-    name: "Jahid Parvez",
-    post: "Product Manager",
-    imgSrc: "/team members/fahad.jpg",
-    desc: "Clean beauty inspired by nature, crafted with science, and made to glow with confidence.",
+    name: "Mohiuddin Sajjad",
+    post: "Product Manager & Designer",
+    imgSrc: "https://i.ibb.co/RG6RHjqJ/sajjad.jpg",
+    desc: "Handles product planning and creates/designs products to align with brand identity and market demand.",
+    facebook: "https://www.facebook.com/ahmed.sajjat.98",
+    instagram: "https://www.instagram.com/ahme_dsajja_d/",
+  },
+  {
+    name: "Rakibul Hasan",
+    post: "CTO",
+    imgSrc: "https://i.ibb.co/fVqCx3m2/rakib.jpg",
+    desc: "Leads all technical aspects, manages systems, and ensures smooth digital operations.",
+    facebook: "https://www.facebook.com/rk.rakib.180625/",
+    instagram: "https://www.instagram.com/rakib.zone/",
+  },
+  {
+    name: "Jehad Parvez",
+    post: "Inventory Manager",
+    imgSrc: "https://i.ibb.co/Y4842QV3/jehad-parvez.jpg",
+    desc: "Tracks stock levels, manages supply, and ensures products are available when needed.",
     facebook: "https://facebook.com",
-    instagram: "https://instagram.com",
+    instagram: null,
   },
 ];
 export default function AboutPage() {
@@ -96,7 +96,7 @@ export default function AboutPage() {
       </section>
       {/* our team */}
       <section className="py-10">
-        <h3 className="text-2xl font-semibold my-10 text-center">Our Team</h3>
+        <h3 className="text-3xl font-semibold text-center mb-10">Our Team</h3>
         {/* Team Members Grid */}
         <div className="mx-auto max-w-7xl px-4 grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {teamMembers.map((member) => (

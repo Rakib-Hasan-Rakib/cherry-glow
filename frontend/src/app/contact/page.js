@@ -122,7 +122,7 @@ export default function ContactPage() {
           <div className="w-full h-[350px] rounded-xl overflow-hidden shadow-md">
             <iframe
               title="Cherry Glow Location"
-              src="https://www.google.com/maps?q=Seoul,South%20Korea&output=embed"
+              src="https://www.google.com/maps?q=Busan,South%20Korea&output=embed"
               width="100%"
               height="100%"
               loading="lazy"

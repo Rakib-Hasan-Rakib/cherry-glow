@@ -5,6 +5,7 @@ import Image from "next/image";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 import {
   DropdownMenu,
@@ -23,7 +24,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/shared/ThemeToggle";
-import LanguageToggle from "@/components/shared/LanguageToggle";
 import { Menu } from "lucide-react";
 import Cart from "./Cart";
 
@@ -36,6 +36,17 @@ const navLinks = [
 
 export default function Navbar() {
   const { user } = useAuth();
+  const router = useRouter();
+
+  // 🔥 FIX: proper logout handler
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push("/login"); // redirect after logout
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
 
   return (
     <header className="border-b bg-background">
@@ -58,15 +69,18 @@ export default function Navbar() {
         {/* Right Actions */}
         <div className="flex items-center gap-2">
           <Cart />
-          <LanguageToggle />
           <ThemeToggle />
-
-          {/* Avatar */}
+          {/* Avatar Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Avatar className="cursor-pointer">
-                <AvatarImage src={user?.photoURL || null} />
-                <AvatarFallback>U</AvatarFallback>
+                {user?.photoURL ? (
+                  <AvatarImage src={user.photoURL} />
+                ) : (
+                  <AvatarFallback>
+                    {user?.name?.charAt(0) || "U"}
+                  </AvatarFallback>
+                )}
               </Avatar>
             </DropdownMenuTrigger>
 
@@ -82,12 +96,15 @@ export default function Navbar() {
                 </>
               ) : (
                 <>
-                  <DropdownMenuItem onClick={() => signOut(auth)}>
+                  <DropdownMenuItem onClick={handleLogout}>
                     Logout
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Link href="/admin">Dashboard</Link>
-                  </DropdownMenuItem>
+
+                  {user.role === "admin" && (
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin">Dashboard</Link>
+                    </DropdownMenuItem>
+                  )}
                 </>
               )}
             </DropdownMenuContent>
@@ -103,6 +120,7 @@ export default function Navbar() {
 
             <SheetContent side="right">
               <SheetTitle>Menu</SheetTitle>
+
               <nav className="mt-6 flex flex-col gap-4">
                 {navLinks.map((link) => (
                   <Link key={link.href} href={link.href}>
