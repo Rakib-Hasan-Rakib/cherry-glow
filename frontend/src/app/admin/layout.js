@@ -4,34 +4,33 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
 import Sidebar from "@/components/admin/Sidebar";
+import { useAuth } from "@/context/AuthContext";
+import { getAuth } from "firebase/auth";
 
 export default function AdminLayout({ children }) {
+  const{loading, user} = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     const checkAdmin = async () => {
-      const user = auth.currentUser;
-      if (!user) {
+      if (loading) return; // ⛔ wait
+
+      if (!user || user.role !== "admin") {
         router.push("/login");
         return;
       }
 
-      const token = await user.getIdToken(true);
+      try {
+        const token = await getAuth().currentUser?.getIdToken();
 
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/check`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (!res.ok) {
-        router.push("/");
+        // call admin API here if needed
+      } catch (err) {
+        console.error(err);
       }
     };
 
     checkAdmin();
-  }, [router]);
+  }, [user, loading]);
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
