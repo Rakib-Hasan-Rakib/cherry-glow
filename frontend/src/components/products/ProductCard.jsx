@@ -5,6 +5,8 @@ import AnimatedDiscountBorder from "../shared/AnimatedDiscountBorder";
 
 export default function ProductCard({ product, onAddToCart }) {
   const { image, name, price, stock, discount } = product;
+  const cartProduct = { image, name, price };
+  console.log(product);
 
   const finalPrice = calculateFinalPrice(price, discount);
   const isHighDiscount = discount >= 10;

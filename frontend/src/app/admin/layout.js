@@ -38,7 +38,7 @@ export default function AdminLayout({ children }) {
       <Sidebar />
 
       {/* Main Content */}
-      <main className="flex-1 p-6 bg-muted/40">{children}</main>
+      <main className="flex-1 p-6">{children}</main>
     </div>
   );
 }

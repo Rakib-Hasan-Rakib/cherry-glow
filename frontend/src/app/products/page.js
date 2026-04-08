@@ -101,9 +101,9 @@ export default function ProductsPage() {
           placeholder="Search products..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full md:w-1/2 md:py-5 focus:ring-2 focus:outline-pink-300"
+          className="w-full md:w-1/2 md:py-5 focus:ring-2 focus:outline-pink-300 bg-white rounded-full shadow-sm pr-1"
         />
-        <X onClick={()=>setSearch("")} className="absolute right-6 md:right-1/2 top-1/2 transform -translate-y-1/2 pr-2 cursor-pointer text-gray-500 hover:text-gray-700" />
+        <X onClick={()=>setSearch("")} className="absolute right-8 md:right-1/2 top-1/2 transform -translate-y-1/2 pr-2 cursor-pointer text-pink-500 hover:text-pink-700" />
       </section>
 
       {/* Categories */}

@@ -1,31 +1,24 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import { Plus, Search } from "lucide-react";
 import { getAuth } from "firebase/auth";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-import ProductForm from "./ProductForm";
-import ProductTable from "./ProductTable";
-import ProductMobileCard from "./ProductMobileCard";
+import ProductTable from "../../../components/products/ProductTable";
+import ProductMobileCard from "../../../components/products/ProductMobileCard";
 
 export default function ProductManagement() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [open, setOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState(null);
   const [search, setSearch] = useState("");
 
+  const router = useRouter();
   const API = `${process.env.NEXT_PUBLIC_API_URL}/products`;
 
   const getToken = async () => {
@@ -38,105 +31,81 @@ export default function ProductManagement() {
     try {
       setLoading(true);
 
-      const query = searchValue
-        ? `?search=${encodeURIComponent(searchValue)}`
-        : "";
+      const token = await getToken();
 
-      const res = await fetch(`${API}/allProduct${query}`, {
+      const res = await axios.get(`${API}/allProduct`, {
+        params: searchValue ? { search: searchValue } : {},
         headers: {
-          Authorization: `Bearer ${await getToken()}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
-      if (!res.ok) throw new Error("Failed to fetch products");
-
-      setProducts(await res.json());
+      setProducts(res.data);
     } catch (err) {
-      toast.error(err.message || "Could not load products");
+      toast.error(err?.response?.data?.message || "Failed to load products");
     } finally {
       setLoading(false);
     }
   };
 
-
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchProducts(search);
-    }, 400); // debounce
+    }, 400);
 
     return () => clearTimeout(timer);
   }, [search]);
 
   const deleteProduct = async (id) => {
     try {
-      const res = await fetch(`${API}/deleteProduct/${id}`, {
-        method: "DELETE",
+      const token = await getToken();
+
+      await axios.delete(`${API}/deleteProduct/${id}`, {
         headers: {
-          Authorization: `Bearer ${await getToken()}`,
+          Authorization: `Bearer ${token}`,
         },
       });
-
-      if (!res.ok) throw new Error("Delete failed");
 
       toast.success("Product deleted");
       fetchProducts();
     } catch (err) {
-      toast.error(err.message || "Delete failed");
+      toast.error(err?.response?.data?.message || "Delete failed");
     }
   };
-  console.log("products:", products);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur pb-4 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <h1 className="text-2xl font-bold">Product Management</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h1 className="text-2xl font-bold">
+          Product Management ({products.length})
+        </h1>
 
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => setEditingProduct(null)} className="gap-2 bg-pink-500 hover:bg-pink-600 text-primary-foreground cursor-pointer">
-                <Plus className="h-4 w-4" />
-                Add Product
-              </Button>
-            </DialogTrigger>
+        <Button
+          onClick={() => router.push("/admin/create")}
+          className="gap-2 bg-pink-500 hover:bg-pink-600 text-white"
+        >
+          <Plus className="h-4 w-4" />
+          Add Product
+        </Button>
+      </div>
 
-            <DialogContent className="max-w-lg w-full">
-              <DialogHeader>
-                <DialogTitle className="text-lg font-semibold text-center">
-                  {editingProduct ? "Edit Product" : "Add Product"}
-                </DialogTitle>
-              </DialogHeader>
-
-              <ProductForm
-                product={editingProduct}
-                onClose={() => setOpen(false)}
-                onSuccess={fetchProducts}
-              />
-            </DialogContent>
-          </Dialog>
-        </div>
-
-        {/* 🔍 Search */}
-        <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by product name..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
-        </div>
+      {/* Search */}
+      <div className="relative max-w-sm">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search by product name..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="pl-9"
+        />
       </div>
 
       {/* Mobile */}
       <ProductMobileCard
         products={products}
         loading={loading}
-        onEdit={(p) => {
-          setEditingProduct(p);
-          setOpen(true);
-        }}
+        onEdit={(p) => router.push(`/dashboard/products/edit/${p._id}`)}
         onDelete={deleteProduct}
       />
 
@@ -144,10 +113,7 @@ export default function ProductManagement() {
       <ProductTable
         products={products}
         loading={loading}
-        onEdit={(p) => {
-          setEditingProduct(p);
-          setOpen(true);
-        }}
+        onEdit={(p) => router.push(`/dashboard/products/edit/${p._id}`)}
         onDelete={deleteProduct}
       />
     </div>

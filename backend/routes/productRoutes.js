@@ -11,57 +11,93 @@ const router = express.Router();
 router.post(
   "/addProduct",
   verifyAdmin,
-  upload.single("image"),
+  upload.array("images", 10), // multiple images
   async (req, res) => {
     try {
       const db = getDB();
 
-      let imageUrl = "";
-      let public_id = "";
-
-      if (req.file) {
-        const uploadResult = await cloudinary.uploader.upload(
-          `data:${req.file.mimetype};base64,${req.file.buffer.toString(
-            "base64"
-          )}`,
-          { folder: "cherry-glow/products", format: "jpg" }
-        );
-
-        imageUrl = uploadResult.secure_url;
-        public_id = uploadResult.public_id;
+      /* ---------------- Parse Variants ---------------- */
+      let variants = [];
+      try {
+        variants = JSON.parse(req.body.variants || "[]");
+      } catch (err) {
+        return res.status(400).json({ message: "Invalid variants format" });
       }
 
+      /* ---------------- Upload Images ---------------- */
+      let images = [];
+
+      if (req.files && req.files.length > 0) {
+        for (const file of req.files) {
+          const uploadResult = await cloudinary.uploader.upload(
+            `data:${file.mimetype};base64,${file.buffer.toString("base64")}`,
+            {
+              folder: "cherry-glow/products",
+            },
+          );
+
+          images.push({
+            url: uploadResult.secure_url,
+            public_id: uploadResult.public_id,
+          });
+        }
+      }
+
+      /* ---------------- Product Object ---------------- */
       const product = {
         name: req.body.name?.trim(),
-        price: Number(req.body.price),
-        category: req.body.category,
-        section: req.body.section || "featured",
-        // Inventory
-        stock: Number(req.body.stock) || 0,
-        // Quantity (ml / g)
-        quantity: req.body.quantity ? Number(req.body.quantity) : null,
-        quantityUnit: req.body.quantityUnit || "ml",
-        // Product details
         brand: req.body.brand || "",
+        category: req.body.category,
+
         description: req.body.description || "",
         useCase: req.body.useCase || "",
-        // Pricing
-        discount: req.body.discount ? Number(req.body.discount) : 0,
-        // Media
-        image: imageUrl,
-        imagePublicId: public_id,
 
-        // Meta
+        // 🔥 Variants
+        variants: variants.map((v) => ({
+          quantity: Number(v.quantity) || null,
+          unit: v.unit || "ml",
+          price: Number(v.price),
+          stock: Number(v.stock) || 0,
+        })),
+
+        // 🔥 Discount
+        discountType: req.body.discountType || "none", // none | percentage | fixed
+        discountValue: Number(req.body.discountValue) || 0,
+
+        // 🔥 Flags
+        isFeatured: req.body.isFeatured === "true",
+        isBestSelling: req.body.isBestSelling === "true",
+
+        // 🔥 Images
+        images,
+
         createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
+      /* ---------------- Validation ---------------- */
+      if (!product.name || !product.category) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      if (!product.variants.length) {
+        return res
+          .status(400)
+          .json({ message: "At least one variant required" });
+      }
+
+      /* ---------------- Insert ---------------- */
       const result = await db.collection("products").insertOne(product);
-      res.status(201).json(result);
+
+      res.status(201).json({
+        message: "Product created",
+        insertedId: result.insertedId,
+      });
     } catch (err) {
       console.error(err);
       res.status(500).json({ message: "Product creation failed" });
     }
-  }
+  },
 );
 
 /* READ ALL PRODUCTS FOR ADMIN */
@@ -104,9 +140,9 @@ router.put(
       if (req.file) {
         const uploadResult = await cloudinary.uploader.upload(
           `data:${req.file.mimetype};base64,${req.file.buffer.toString(
-            "base64"
+            "base64",
           )}`,
-          { folder: "cherry-glow/products", format: "jpg" }
+          { folder: "cherry-glow/products", format: "jpg" },
         );
         updateData.image = uploadResult.secure_url;
       }
@@ -119,7 +155,7 @@ router.put(
     } catch (err) {
       res.status(500).json({ message: "Update failed" });
     }
-  }
+  },
 );
 
 /* DELETE PRODUCT */
@@ -222,6 +258,8 @@ router.get("/products/featured", async (req, res) => {
   const products = await db
     .collection("products")
     .find({ section: "featured" })
+    .limit(3)
+    .sort({ createdAt: -1 })
     .toArray();
 
   res.json(products);

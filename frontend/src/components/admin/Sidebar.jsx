@@ -28,7 +28,7 @@ export default function Sidebar() {
       {/* Sidebar */}
       <aside
         className={`
-          fixed z-50 h-full w-64 transform border-r bg-background p-5
+          fixed z-50 h-full w-64 transform border-r bg-gray-100 p-5
           transition-transform duration-300
           sm:static sm:translate-x-0
           ${open ? "translate-x-0" : "-translate-x-full"}
