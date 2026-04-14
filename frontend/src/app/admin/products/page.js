@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import { Plus, Search } from "lucide-react";
 import { getAuth } from "firebase/auth";
@@ -26,6 +26,31 @@ export default function ProductManagement() {
     if (!user) throw new Error("User not authenticated");
     return user.getIdToken();
   };
+
+  /* ---------------- Helpers ---------------- */
+
+  // 💰 get min price from variants
+  const getMinPrice = (variants = []) => {
+    if (!variants.length) return 0;
+    return Math.min(...variants.map((v) => v.price));
+  };
+
+  // 🖼️ get thumbnail
+  const getThumbnail = (images = []) => {
+    return images?.[0]?.url || "/placeholder.png";
+  };
+
+  // 🔥 normalize data (important if Mongo returns $oid)
+  const normalizedProducts = useMemo(() => {
+    return products.map((p) => ({
+      ...p,
+      id: p._id?.$oid || p._id, // handle both cases
+      minPrice: getMinPrice(p.variants),
+      thumbnail: getThumbnail(p.images),
+    }));
+  }, [products]);
+
+  /* ---------------- Fetch ---------------- */
 
   const fetchProducts = async (searchValue = "") => {
     try {
@@ -56,6 +81,8 @@ export default function ProductManagement() {
     return () => clearTimeout(timer);
   }, [search]);
 
+  /* ---------------- Delete ---------------- */
+
   const deleteProduct = async (id) => {
     try {
       const token = await getToken();
@@ -73,12 +100,14 @@ export default function ProductManagement() {
     }
   };
 
+  /* ---------------- UI ---------------- */
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h1 className="text-2xl font-bold">
-          Product Management ({products.length})
+          Product Management ({normalizedProducts.length})
         </h1>
 
         <Button
@@ -103,18 +132,18 @@ export default function ProductManagement() {
 
       {/* Mobile */}
       <ProductMobileCard
-        products={products}
+        products={normalizedProducts}
         loading={loading}
-        onEdit={(p) => router.push(`/dashboard/products/edit/${p._id}`)}
-        onDelete={deleteProduct}
+        onEdit={(p) => router.push(`/admin/edit/${p.id}`)}
+        onDelete={(p) => deleteProduct(p.id)}
       />
 
       {/* Desktop */}
       <ProductTable
-        products={products}
+        products={normalizedProducts}
         loading={loading}
-        onEdit={(p) => router.push(`/dashboard/products/edit/${p._id}`)}
-        onDelete={deleteProduct}
+        onEdit={(p) => router.push(`/admin/edit/${p.id}`)}
+        onDelete={(p) => deleteProduct(p.id)}
       />
     </div>
   );

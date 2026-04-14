@@ -54,7 +54,7 @@ router.post(
 
         // 🔥 Variants
         variants: variants.map((v) => ({
-          quantity: Number(v.quantity) || null,
+          weight: Number(v.weight) || null,
           unit: v.unit || "ml",
           price: Number(v.price),
           stock: Number(v.stock) || 0,
@@ -125,34 +125,114 @@ router.get("/allProduct", async (req, res) => {
 router.put(
   "/updateProduct/:id",
   verifyAdmin,
-  upload.single("image"),
+  upload.array("images", 10),
   async (req, res) => {
     try {
       const db = getDB();
+      const productId = new ObjectId(req.params.id);
+
+      /* ---------------- Get Existing Product ---------------- */
+      const existingProduct = await db
+        .collection("products")
+        .findOne({ _id: productId });
+
+      if (!existingProduct) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+
+      /* ---------------- Parse Data ---------------- */
+
+      let variants = [];
+      try {
+        variants = JSON.parse(req.body.variants || "[]");
+      } catch {
+        return res.status(400).json({ message: "Invalid variants format" });
+      }
+
+      let existingImages = [];
+      try {
+        existingImages = JSON.parse(req.body.existingImages || "[]");
+      } catch {
+        existingImages = [];
+      }
+
+      /* ---------------- Delete Removed Images ---------------- */
+
+      const oldImages = existingProduct.images || [];
+
+      const removedImages = oldImages.filter(
+        (oldImg) =>
+          !existingImages.some((img) => img.public_id === oldImg.public_id),
+      );
+
+      // 🔥 delete from cloudinary
+      for (const img of removedImages) {
+        if (img.public_id) {
+          await cloudinary.uploader.destroy(img.public_id);
+        }
+      }
+
+      /* ---------------- Upload New Images ---------------- */
+
+      let newUploadedImages = [];
+
+      if (req.files && req.files.length > 0) {
+        for (const file of req.files) {
+          const uploadResult = await cloudinary.uploader.upload(
+            `data:${file.mimetype};base64,${file.buffer.toString("base64")}`,
+            {
+              folder: "cherry-glow/products",
+            },
+          );
+
+          newUploadedImages.push({
+            url: uploadResult.secure_url,
+            public_id: uploadResult.public_id,
+          });
+        }
+      }
+
+      /* ---------------- Final Images ---------------- */
+
+      const finalImages = [...existingImages, ...newUploadedImages];
+
+      /* ---------------- Update Object ---------------- */
+
       const updateData = {
-        name: req.body.name,
-        price: Number(req.body.price),
+        name: req.body.name?.trim(),
+        brand: req.body.brand || "",
         category: req.body.category,
-        section: req.body.section,
-        stock: Number(req.body.stock),
+
+        description: req.body.description || "",
+        useCase: req.body.useCase || "",
+
+        variants: variants.map((v) => ({
+          quantity: Number(v.quantity) || null,
+          unit: v.unit || "ml",
+          price: Number(v.price),
+          stock: Number(v.stock) || 0,
+        })),
+
+        discountType: req.body.discountType || "none",
+        discountValue: Number(req.body.discountValue) || 0,
+
+        isFeatured: req.body.isFeatured === "true",
+        isBestSelling: req.body.isBestSelling === "true",
+
+        images: finalImages,
+
+        updatedAt: new Date(),
       };
 
-      if (req.file) {
-        const uploadResult = await cloudinary.uploader.upload(
-          `data:${req.file.mimetype};base64,${req.file.buffer.toString(
-            "base64",
-          )}`,
-          { folder: "cherry-glow/products", format: "jpg" },
-        );
-        updateData.image = uploadResult.secure_url;
-      }
+      /* ---------------- Update DB ---------------- */
 
       await db
         .collection("products")
-        .updateOne({ _id: new ObjectId(req.params.id) }, { $set: updateData });
+        .updateOne({ _id: productId }, { $set: updateData });
 
-      res.json({ message: "Product updated" });
+      res.json({ message: "Product updated successfully" });
     } catch (err) {
+      console.error(err);
       res.status(500).json({ message: "Update failed" });
     }
   },
@@ -214,8 +294,8 @@ router.get("/allProduct/public", async (req, res) => {
           section: 1,
           stock: 1,
           brand: 1,
-          quantity: 1,
-          quantityUnit: 1,
+          weight: 1,
+          weightUnit: 1,
           description: 1,
           discount: 1,
           useCase: 1,
@@ -232,7 +312,7 @@ router.get("/allProduct/public", async (req, res) => {
 });
 
 // GET single product (public)
-router.get("/product/:id/public", async (req, res) => {
+router.get("/singleProduct/:id", async (req, res) => {
   try {
     const db = getDB();
     const { id } = req.params;

@@ -51,7 +51,7 @@ export default function CreateProductPage() {
   });
 
   const [variants, setVariants] = useState([
-    { quantity: "", unit: "ml", price: "", stock: "" },
+    { weight: "", unit: "ml", price: "", stock: "" },
   ]);
 
   const API = `${process.env.NEXT_PUBLIC_API_URL}/products`;
@@ -66,7 +66,7 @@ export default function CreateProductPage() {
   const addVariant = () => {
     setVariants([
       ...variants,
-      { quantity: "", unit: "ml", price: "", stock: "" },
+      { wi: "", unit: "ml", price: "", stock: "" },
     ]);
   };
 
@@ -282,9 +282,9 @@ export default function CreateProductPage() {
               className="flex gap-2 bg-muted/30 p-2 rounded-lg"
             >
               <Input
-                placeholder="Qty"
-                value={v.quantity}
-                onChange={(e) => updateVariant(i, "quantity", e.target.value)}
+                placeholder="Weight"
+                value={v.weight}
+                onChange={(e) => updateVariant(i, "weight", e.target.value)}
               />
 
               <Select

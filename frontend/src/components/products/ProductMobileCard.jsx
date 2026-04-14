@@ -5,6 +5,22 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
+/* ---------------- Helpers ---------------- */
+
+const getPriceRange = (variants = []) => {
+  if (!variants.length) return "—";
+
+  const prices = variants.map((v) => v.price);
+  const min = Math.min(...prices);
+  const max = Math.max(...prices);
+
+  return min === max ? `৳ ${min}` : `৳ ${min} - ${max}`;
+};
+
+const getThumbnail = (images = []) => {
+  return images?.[0]?.url || "/placeholder.png";
+};
+
 export default function ProductMobileCard({
   products,
   loading,
@@ -19,32 +35,49 @@ export default function ProductMobileCard({
           ))
         : products.map((p) => (
             <Card
-              key={p._id}
-              className="space-y-3 p-4 transition-colors hover:bg-muted/40"
+              key={p.id}
+              className="space-y-3 p-4 transition hover:shadow-md"
             >
+              {/* Image */}
               <Image
-                src={p.image}
+                src={getThumbnail(p.images)}
                 alt={p.name}
                 width={300}
                 height={160}
-                className="rounded-lg border bg-muted object-cover"
+                className="rounded-lg border object-cover w-full h-40"
               />
 
+              {/* Name + Category */}
               <div className="space-y-1">
-                <h3 className="font-semibold text-foreground">{p.name}</h3>
+                <h3 className="font-semibold">{p.name}</h3>
 
-                <p className="text-sm text-muted-foreground">
-                  {p.category} • {p.section}
-                </p>
+                <p className="text-sm text-muted-foreground">{p.category}</p>
               </div>
 
-              <p className="font-medium text-foreground">৳ {p.price}</p>
+              {/* Price */}
+              <p className="font-medium">{getPriceRange(p.variants)}</p>
 
-              <div className="flex gap-2 pt-1">
+              {/* Badges */}
+              <div className="flex gap-2 flex-wrap">
+                {p.isFeatured && (
+                  <span className="text-xs px-2 py-1 rounded bg-pink-100 text-pink-600">
+                    Featured
+                  </span>
+                )}
+                {p.isBestSelling && (
+                  <span className="text-xs px-2 py-1 rounded bg-green-100 text-green-600">
+                    Best
+                  </span>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2 pt-2">
                 <Button
                   size="icon"
                   variant="secondary"
                   onClick={() => onEdit(p)}
+                  className="cursor-pointer"
                 >
                   <Pencil className="h-4 w-4" />
                 </Button>
@@ -52,7 +85,8 @@ export default function ProductMobileCard({
                 <Button
                   size="icon"
                   variant="destructive"
-                  onClick={() => onDelete(p._id)}
+                  onClick={() => onDelete(p.id)}
+                  className="cursor-pointer"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
