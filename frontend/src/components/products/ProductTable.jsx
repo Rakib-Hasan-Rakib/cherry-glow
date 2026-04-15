@@ -103,7 +103,7 @@ export default function ProductTable({ products, loading, onEdit, onDelete }) {
                       <Button
                         size="icon"
                         variant="destructive"
-                        onClick={() => onDelete(p.id)}
+                        onClick={() => onDelete(p._id)}
                         className="cursor-pointer"
                       >
                         <Trash2 className="h-4 w-4" />

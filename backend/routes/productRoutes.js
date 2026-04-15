@@ -207,7 +207,7 @@ router.put(
         useCase: req.body.useCase || "",
 
         variants: variants.map((v) => ({
-          quantity: Number(v.quantity) || null,
+          weight: Number(v.weight) || null,
           unit: v.unit || "ml",
           price: Number(v.price),
           stock: Number(v.stock) || 0,
@@ -273,38 +273,66 @@ router.get("/allProduct/public", async (req, res) => {
 
     const query = {};
 
-    // Server-side search (product name)
+    /* ---------------- SEARCH ---------------- */
     if (search) {
       query.name = { $regex: search, $options: "i" };
     }
 
-    // Category filter (do not force NONE)
+    /* ---------------- CATEGORY ---------------- */
     if (category !== "All") {
       query.category = category;
     }
 
+    /* ---------------- FETCH ---------------- */
     const products = await db
       .collection("products")
-      .find(query, {
-        projection: {
-          name: 1,
-          price: 1,
-          category: 1,
-          image: 1,
-          section: 1,
-          stock: 1,
-          brand: 1,
-          weight: 1,
-          weightUnit: 1,
-          description: 1,
-          discount: 1,
-          useCase: 1,
-        },
-      })
+      .find(query)
       .sort({ createdAt: -1 })
       .toArray();
 
-    res.json(products);
+    /* ---------------- TRANSFORM (IMPORTANT) ---------------- */
+    const formattedProducts = products.map((p) => {
+      const variants = p.variants || [];
+
+      // lowest price variant (for listing UI)
+      const minVariant = variants.reduce((min, v) => {
+        if (!min) return v;
+        return v.price < min.price ? v : min;
+      }, null);
+
+      // total stock
+      const totalStock = variants.reduce((sum, v) => sum + (v.stock || 0), 0);
+
+      return {
+        _id: p._id,
+
+        name: p.name,
+        brand: p.brand,
+        category: p.category,
+
+        // ✅ IMPORTANT FOR FRONTEND
+        image: p.images?.[0]?.url || null,
+
+        // pricing (from variants)
+        basePrice: minVariant?.price || 0,
+
+        // full variants (needed for selection UI)
+        variants: variants,
+
+        // stock (combined)
+        stock: totalStock,
+
+        // discount
+        discountType: p.discountType || null,
+        discountValue: p.discountValue || 0,
+
+        // flags
+        isFeatured: p.isFeatured || false,
+        isBestSelling: p.isBestSelling || false,
+      };
+    });
+
+    res.json(formattedProducts);
   } catch (error) {
     console.error("Public products error:", error);
     res.status(500).json({ message: "Failed to load products" });

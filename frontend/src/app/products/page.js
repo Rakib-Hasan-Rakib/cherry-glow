@@ -8,6 +8,7 @@ import { useCart } from "@/context/CartContext";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import axios from "axios";
 
 const CATEGORIES = [
   "All",
@@ -24,14 +25,20 @@ const CATEGORIES = [
 export default function ProductsPage() {
   const { addToCart } = useCart();
   const searchParams = useSearchParams();
+
   const urlCategory = searchParams.get("category") || "All";
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+
   const [category, setCategory] = useState(urlCategory);
 
+  const API = `${process.env.NEXT_PUBLIC_API_URL}/products`;
+
+  /* ---------------- Debounce ---------------- */
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
@@ -40,31 +47,25 @@ export default function ProductsPage() {
     return () => clearTimeout(timer);
   }, [search]);
 
+  /* ---------------- Fetch ---------------- */
   useEffect(() => {
-    const controller = new AbortController();
+    const source = axios.CancelToken.source();
 
     const fetchProducts = async () => {
       try {
         setLoading(true);
 
-        const params = new URLSearchParams();
-        if (search) params.append("search", search);
-        if (category !== "All") params.append("category", category);
+        const res = await axios.get(`${API}/allProduct/public`, {
+          params: {
+            ...(debouncedSearch && { search: debouncedSearch }),
+            ...(category !== "All" && { category }),
+          },
+          cancelToken: source.token,
+        });
 
-        const res = await fetch(
-          `${
-            process.env.NEXT_PUBLIC_API_URL
-          }/products/allProduct/public?${params.toString()}`,
-          { signal: controller.signal }
-        );
-
-        if (!res.ok) throw new Error("Failed to fetch products");
-
-        const data = await res.json();
-        setProducts(data);
+        setProducts(res.data);
       } catch (err) {
-        // IMPORTANT: ignore abort errors
-        if (err.name !== "AbortError") {
+        if (!axios.isCancel(err)) {
           console.error("Fetch error:", err);
         }
       } finally {
@@ -74,23 +75,25 @@ export default function ProductsPage() {
 
     fetchProducts();
 
-    return () => controller.abort();
+    return () => source.cancel("Request cancelled");
   }, [debouncedSearch, category]);
 
+  /* ---------------- UI ---------------- */
 
   return (
     <div className="bg-pink-50 min-h-screen">
       {/* Hero */}
       <section className="max-w-7xl mx-auto px-6 pt-10">
-        <div className="bg-pink-100 rounded-3xl p-10 grid md:grid-cols-2 gap-6">
+        <div className="bg-pink-100 rounded-3xl p-8 md:p-10 grid md:grid-cols-2 gap-6 items-center">
           <div>
-            <h1 className="text-4xl font-bold text-gray-800 mb-4">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
               Healthy Skin is a Reflection of Wellness
             </h1>
-            <p className="text-gray-600 mb-6">
-              Discover premium beauty products curated for your glow.
+            <p className="text-gray-600">
+              Discover premium skincare curated for your glow.
             </p>
           </div>
+
           <HeroImageSlider />
         </div>
       </section>
@@ -101,9 +104,15 @@ export default function ProductsPage() {
           placeholder="Search products..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full md:w-1/2 md:py-5 focus:ring-2 focus:outline-pink-300 bg-white rounded-full shadow-sm pr-1"
+          className="w-full md:w-1/2 md:py-5 bg-white rounded-full shadow-sm pr-10"
         />
-        <X onClick={()=>setSearch("")} className="absolute right-8 md:right-1/2 top-1/2 transform -translate-y-1/2 pr-2 cursor-pointer text-pink-500 hover:text-pink-700" />
+
+        {search && (
+          <X
+            onClick={() => setSearch("")}
+            className="absolute right-8 md:right-[50%] top-1/2 -translate-y-1/2 cursor-pointer text-pink-500 hover:text-pink-700"
+          />
+        )}
       </section>
 
       {/* Categories */}
@@ -113,12 +122,12 @@ export default function ProductsPage() {
             <button
               key={cat}
               onClick={() => setCategory(cat)}
-              className={`px-5 py-2 rounded-full border whitespace-nowrap crursor-pointer
-                ${
-                  category === cat
-                    ? "bg-pink-500 text-white border-pink-500"
-                    : "bg-white text-gray-600 hover:bg-pink-100"
-                }`}
+              className={`px-5 py-2 rounded-full border whitespace-nowrap transition
+              ${
+                category === cat
+                  ? "bg-pink-500 text-white border-pink-500"
+                  : "bg-white text-gray-600 hover:bg-pink-100"
+              }`}
             >
               {cat}
             </button>
@@ -127,19 +136,30 @@ export default function ProductsPage() {
       </section>
 
       {/* Products */}
-      <section
-        className="grid md:grid-cols-3 lg:grid-cols-4 gap-6 items-stretch max-w-7xl mx-auto px-6 my-10"
-        id="products"
-      >
-        {loading
-          ? Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
-          : products.map((product) => (
+      <section className="max-w-7xl mx-auto px-6 my-10">
+        {loading ? (
+          <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        ) : products.length === 0 ? (
+          <div className="text-center py-20 text-gray-500">
+            <p className="text-lg">No products found</p>
+            <p className="text-sm mt-1">Try different keywords or category</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6 items-stretch">
+            {products.map((product, index) => (
               <ProductCard
                 key={product._id}
                 product={product}
+                index={index}
                 onAddToCart={addToCart}
               />
             ))}
+          </div>
+        )}
       </section>
     </div>
   );

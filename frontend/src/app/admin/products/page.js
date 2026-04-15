@@ -99,7 +99,6 @@ export default function ProductManagement() {
       toast.error(err?.response?.data?.message || "Delete failed");
     }
   };
-
   /* ---------------- UI ---------------- */
 
   return (
@@ -135,7 +134,7 @@ export default function ProductManagement() {
         products={normalizedProducts}
         loading={loading}
         onEdit={(p) => router.push(`/admin/edit/${p.id}`)}
-        onDelete={(p) => deleteProduct(p.id)}
+        onDelete={(id) => deleteProduct(id)}
       />
 
       {/* Desktop */}
@@ -143,7 +142,7 @@ export default function ProductManagement() {
         products={normalizedProducts}
         loading={loading}
         onEdit={(p) => router.push(`/admin/edit/${p.id}`)}
-        onDelete={(p) => deleteProduct(p.id)}
+        onDelete={(id) => deleteProduct(id)}
       />
     </div>
   );
