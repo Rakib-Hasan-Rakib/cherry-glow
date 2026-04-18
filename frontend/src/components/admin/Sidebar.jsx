@@ -50,6 +50,7 @@ export default function Sidebar() {
           <SidebarLink href="/admin/products">Products</SidebarLink>
           <SidebarLink href="/admin/roles">Users</SidebarLink>
           <SidebarLink href="/admin/orders">Orders</SidebarLink>
+          <SidebarLink href="/admin/banner">Promo Banner</SidebarLink>
         </nav>
       </aside>
     </>

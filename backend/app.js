@@ -4,6 +4,7 @@ import authRoutes from "./routes/auth.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orders.routes.js";
+import bannerRoutes from "./routes/banner.route.js";
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use("/api/auth", authRoutes);
 app.use("/admin", adminRoutes);
 app.use("/products", productRoutes);
 app.use("/orders", orderRoutes);
+app.use("/banners", bannerRoutes);
 
 app.get("/", (_, res) => {
   res.send("Cherry Glow API running");

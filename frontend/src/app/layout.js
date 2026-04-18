@@ -6,6 +6,7 @@ import Messenger from "@/components/shared/Messenger";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { Toaster } from "sonner";
+import PromoPopup from "@/components/popup/PromoPopup";
 
 export const metadata = {
   title: "Cherry Glow",
@@ -20,6 +21,7 @@ export default function RootLayout({ children }) {
           <AuthProvider>
             <CartProvider>
               <Navbar />
+              <PromoPopup />
               {children}
               <Toaster richColors position="top-right" />
               <Messenger />
