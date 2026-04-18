@@ -62,6 +62,7 @@ export default function ProductCard({ product, onAddToCart, index }) {
     "/upload/",
     "/upload/w_600,f_auto,q_auto:good/",
   );
+  console.log(product)
 
   /* ---------------- UI ---------------- */
 

@@ -361,16 +361,33 @@ router.get("/singleProduct/:id", async (req, res) => {
 });
 
 // GET featured products (public)
-router.get("/products/featured", async (req, res) => {
-  const db = getDB();
-  const products = await db
-    .collection("products")
-    .find({ section: "featured" })
-    .limit(3)
-    .sort({ createdAt: -1 })
-    .toArray();
 
-  res.json(products);
+router.get("/featured", async (req, res) => {
+  try {
+    const db = getDB();
+
+    // optional: ?limit=6
+    const limit = parseInt(req.query.limit) || 6;
+
+    const products = await db
+      .collection("products")
+      .find({ isFeatured: true })
+      .sort({ createdAt: -1, _id: -1 }) // safe sorting
+      .limit(limit)
+      .toArray();
+
+    res.status(200).json({
+      success: true,
+      count: products.length,
+      data: products,
+    });
+  } catch (error) {
+    console.error("Featured products error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch featured products",
+    });
+  }
 });
 
 // GET best sellers products (public)
