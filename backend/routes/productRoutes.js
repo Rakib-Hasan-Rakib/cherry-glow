@@ -391,14 +391,34 @@ router.get("/featured", async (req, res) => {
 });
 
 // GET best sellers products (public)
-router.get("/products/best", async (req, res) => {
-  const db = getDB();
-  const products = await db
-    .collection("products")
-    .find({ section: "best" })
-    .toArray();
 
-  res.json(products);
+router.get("/best", async (req, res) => {
+  try {
+    const db = getDB();
+
+    // optional: ?limit=6
+    const limit = parseInt(req.query.limit) || 5;
+
+    const products = await db
+      .collection("products")
+      .find({ isBestSelling: true })
+      .sort({ createdAt: -1, _id: -1 }) // safe sorting
+      .limit(limit)
+      .toArray();
+
+    res.status(200).json({
+      success: true,
+      count: products.length,
+      data: products,
+    });
+  } catch (error) {
+    console.error("Best selling products error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch best selling products",
+    });
+  }
 });
 
 export default router;

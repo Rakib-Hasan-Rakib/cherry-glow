@@ -17,7 +17,6 @@ export default function FeaturedProducts() {
         const res = await axios.get(API);
         setFeaturedProducts(res?.data?.data || []);
       } catch (err) {
-        console.error(err);
         setError("Failed to load featured products");
       } finally {
         setLoading(false);

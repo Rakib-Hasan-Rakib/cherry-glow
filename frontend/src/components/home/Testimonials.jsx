@@ -7,30 +7,30 @@ import { Star } from "lucide-react";
 const testimonials = [
   {
     id: 1,
-    name: "Ayesha Rahman",
-    date: "March 12, 2025",
+    name: "Papiya Akter Popy",
+    date: "March 12, 2026",
     message:
-      "Cherry Glow has transformed my skincare routine. My skin feels smoother, brighter, and healthier.",
+      "এতদিন অরিজিনাল কোরিয়ান স্কিনকেয়ার খুঁজে পাওয়া ছিল সবচেয়ে বড় চ্যালেঞ্জ। কিন্তু এখান থেকে প্রোডাক্ট নেওয়ার পর বুঝেছি—অথেন্টিক জিনিস এখনো পাওয়া যায়। ধন্যবাদ সবসময় অরিজিনাল প্রোডাক্ট দেওয়ার জন্য। এখন থেকে নির্ভয়ে এখান থেকেই শপিং করব।",
     rating: 5,
-    image: "/hero-1.jpg",
+    image: "https://i.ibb.co/Q7XNs2BP/popy.jpg",
   },
   {
     id: 2,
-    name: "Nusrat Jahan",
-    date: "April 2, 2025",
+    name: "Sohana Islam",
+    date: "March 27, 2026",
     message:
-      "The products feel premium and gentle. I love how natural and effective they are.",
+      "আমি ব্যবহার করছি make p:rem Low-Irritant & Mild Acid Foam Cleanser এবং honestly এটা sensitive skin friendly একটা amazing cleanser 💚",
     rating: 5,
-    image: "/hero-2.jpg",
+    image: "https://i.ibb.co/mrcbsxR1/sohana.jpg",
   },
   {
     id: 3,
-    name: "Farhan Ahmed",
-    date: "April 18, 2025",
+    name: "Md Saddam Hossain",
+    date: "April 18, 2026",
     message:
-      "Amazing quality and beautiful packaging. Cherry Glow truly stands out.",
-    rating: 4,
-    image: "/hero-1.jpg",
+      "যারা স্কিন কেয়ার নিয়ে কনফিউজড, তাদের জন্য Cherry Glow Korea হতে পারে একটা ট্রাস্টেড অপশন, আমি অবশ্যই আবার অর্ডার করবো! এত ভালো সার্ভিস আর অরিজিনাল প্রোডাক্টের জন্য ধন্যবাদ।",
+    rating: 5,
+    image: "https://i.ibb.co/8LVQ598q/saddam.jpg",
   },
 ];
 

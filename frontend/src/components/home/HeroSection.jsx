@@ -10,7 +10,6 @@ import {
   useTransform,
 } from "framer-motion";
 import Link from "next/link";
-import SnowParticles from "./SnowParticles";
 
 const slides = [
   {

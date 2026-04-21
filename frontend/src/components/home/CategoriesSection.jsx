@@ -4,14 +4,22 @@ import Image from "next/image";
 import Link from "next/link";
 
 const categories = [
-  { id: 1, name: "CLEANSER", image: "/categories/skin_care.jpg" },
-  { id: 2, name: "TONER", image: "/categories/makeup.jpg" },
-  { id: 3, name: "SERUM", image: "/categories/hair_care.jpg" },
-  { id: 4, name: "EYE CARE", image: "/categories/fragrance.jpg" },
-  { id: 5, name: "MOISTURIZER", image: "/categories/body_care.jpg" },
-  { id: 6, name: "SUNSCREEN", image: "/categories/skin_care.jpg" },
-  { id: 7, name: "MASK", image: "/categories/makeup.jpg" },
-  { id: 8, name: "OIL", image: "/categories/hair_care.jpg" },
+  { id: 1, name: "CLEANSER", image: "https://i.ibb.co/XZmby8wp/body-care.jpg" },
+  { id: 2, name: "TONER", image: "https://i.ibb.co/DTj6vTX/fragrance.jpg" },
+  { id: 3, name: "SERUM", image: "https://i.ibb.co/jPVqmVjK/hair-care.jpg" },
+  { id: 4, name: "EYE CARE", image: "https://i.ibb.co/WNXFcJdX/makeup.jpg" },
+  {
+    id: 5,
+    name: "MOISTURIZER",
+    image: "https://i.ibb.co/vxBd6rWx/skin-care.jpg",
+  },
+  {
+    id: 6,
+    name: "SUNSCREEN",
+    image: "https://i.ibb.co/XZmby8wp/body-care.jpg",
+  },
+  { id: 7, name: "MASK", image: "https://i.ibb.co/jPVqmVjK/hair-care.jpg" },
+  { id: 8, name: "OIL", image: "https://i.ibb.co/vxBd6rWx/skin-care.jpg" },
 ];
 
 export default function CategoryMarquee() {
@@ -37,6 +45,8 @@ export default function CategoryMarquee() {
                     src={cat.image}
                     alt={cat.name}
                     fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    priority
                     className="object-cover transition-transform duration-300 hover:scale-110"
                   />
                 </Link>
