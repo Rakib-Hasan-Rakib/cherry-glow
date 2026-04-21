@@ -13,13 +13,14 @@ export default function ProductCard({ product, onAddToCart, index }) {
     variants = [],
     discountType,
     discountValue,
-    stock,
   } = product;
 
   // 👉 Default variant (lowest price or first)
   const [selectedVariant, setSelectedVariant] = useState(variants[0] || null);
 
   /* ---------------- Price Logic ---------------- */
+
+  
 
   const finalPrice = useMemo(() => {
     if (!selectedVariant) return 0;
@@ -42,27 +43,23 @@ export default function ProductCard({ product, onAddToCart, index }) {
   /* ---------------- Cart Payload ---------------- */
   const handleAddToCart = () => {
     if (!selectedVariant || selectedVariant.stock === 0) return;
+    console.log(image);
 
     // ✅ Minimal optimized cart object
-    onAddToCart({
-      productId: _id,
+    const productForCart = {
+      _id,
       name,
       image,
-      price: finalPrice,
-      originalPrice: selectedVariant.price,
-      quantity: 1,
-      variant: {
-        weight: selectedVariant.weight,
-        unit: selectedVariant.unit,
-      },
-    });
+      variants,
+    };
+    onAddToCart(productForCart);
   };
+  // console.log(product)
 
   const optimizedImage = image.replace(
     "/upload/",
     "/upload/w_600,f_auto,q_auto:good/",
   );
-  console.log(product)
 
   /* ---------------- UI ---------------- */
 

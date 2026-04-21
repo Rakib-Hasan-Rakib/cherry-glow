@@ -12,7 +12,7 @@ export default function ProductCard({ product }) {
   const router = useRouter();
   const { addToCart } = useCart();
 
-  const { name, images = [], variants = [], _id } = product;
+  const { name, images, variants, _id } = product;
 
   // ✅ Safe image fallback
   const image = images?.[0]?.url || "/placeholder.png";
@@ -24,6 +24,18 @@ export default function ProductCard({ product }) {
   const totalStock = variants.reduce((sum, v) => sum + (v.stock || 0), 0);
 
   const inStock = totalStock > 0;
+
+  const handleAddToCart = () => {
+
+    // ✅ Minimal optimized cart object
+    const productForCart = {
+      _id,
+      name,
+      image: images?.[0]?.url || "/placeholder.png",
+      variants,
+    };
+    addToCart(productForCart);
+  };
 
   return (
     <div
@@ -95,7 +107,7 @@ export default function ProductCard({ product }) {
           <Button
             onClick={(e) => {
               e.stopPropagation(); // ✅ prevent redirect
-              addToCart(product);
+              handleAddToCart();
             }}
             size="sm"
             disabled={!inStock}

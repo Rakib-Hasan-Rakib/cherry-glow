@@ -102,23 +102,17 @@ export default function ProductDetailsPage() {
 
     setAdding(true);
 
-    addToCart({
-      productId: product._id,
-      name: product.name,
-      image: selectedImage || FALLBACK_IMAGE,
-      price: finalPrice,
-      variant: selectedVariant
-        ? {
-            name: selectedVariant.name,
-            weight: selectedVariant.weight,
-          }
-        : null,
-      quantity: 1,
-    });
+    const productForCart = {
+      _id: product?._id,
+      name: product?.name,
+      image: product?.images[0]?.url || '/placeholder.jpg',
+      variants: product?.variants || [],
+    };
+
+    addToCart(productForCart);
 
     setTimeout(() => {
       setAdding(false);
-      toast.success("Added to cart");
     }, 400);
   };
 

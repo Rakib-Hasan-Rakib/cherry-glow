@@ -7,74 +7,104 @@ const CartContext = createContext();
 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
-  const [hydrated, setHydrated] = useState(false);
+  const [coupon, setCoupon] = useState(null);
 
-  // Load from localStorage (client only)
+  // Load
   useEffect(() => {
-    const stored = localStorage.getItem("cart");
-    if (stored) {
-      setCart(JSON.parse(stored));
-    }
-    setHydrated(true);
+    const storedCart = localStorage.getItem("cart");
+    if (storedCart) setCart(JSON.parse(storedCart));
+
+    // 🔥 simulate user-specific coupon (later from API)
+    const userCoupon = {
+      type: "percentage", // or "flat"
+      value: 10,
+    };
+
+    setCoupon(userCoupon);
   }, []);
 
-  // Save to localStorage (after hydration)
+  // Save
   useEffect(() => {
-    if (hydrated) {
-      localStorage.setItem("cart", JSON.stringify(cart));
-    }
-  }, [cart, hydrated]);
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }, [cart]);
 
-
+  // ✅ Add to cart (NO variant required)
   const addToCart = (product) => {
     setCart((prev) => {
-      const exists = prev.find((p) => p._id === product._id);
+      const exists = prev.find((i) => i.productId === product._id);
 
       if (exists) {
-        return prev.map((p) =>
-          p._id === product._id
-            ? { ...p, quantity: Math.min(p.quantity + 1, p.stock) }
-            : p
+        return prev.map((i) =>
+          i.productId === product._id ? { ...i, quantity: i.quantity + 1 } : i,
         );
       }
 
-      return [...prev, { ...product, quantity: 1 }];
-      
+      return [
+        ...prev,
+        {
+          productId: product._id,
+          name: product.name,
+          image: product.image || null,
+          variants: product.variants,
+          selectedVariant: null, // 🔥 important
+          quantity: 1,
+        },
+      ];
     });
-    toast.success("Product added to cart");
+
+    toast.success("Added to cart");
   };
 
-  const updateQuantity = (id, type) => {
+  // ✅ Select variant in cart
+  const selectVariant = (productId, variant) => {
     setCart((prev) =>
-      prev.map((item) => {
-        if (item._id !== id) return item;
-
-        const qty =
-          type === "inc"
-            ? Math.min(item.quantity + 1, item.stock)
-            : Math.max(item.quantity - 1, 1);
-
-        return { ...item, quantity: qty };
-      })
+      prev.map((item) =>
+        item.productId === productId
+          ? {
+              ...item,
+              selectedVariant: variant,
+              quantity: 1, // reset for safety
+            }
+          : item,
+      ),
     );
   };
 
-  const removeFromCart = (id) => {
-    setCart((prev) => prev.filter((item) => item._id !== id));
+  // ✅ Quantity
+  const updateQuantity = (productId, type) => {
+    setCart((prev) =>
+      prev.map((item) => {
+        if (item.productId !== productId) return item;
+
+        if (!item.selectedVariant) return item;
+
+        const stock = item.selectedVariant.stock;
+
+        let qty =
+          type === "inc"
+            ? Math.min(item.quantity + 1, stock)
+            : Math.max(item.quantity - 1, 1);
+
+        return { ...item, quantity: qty };
+      }),
+    );
   };
 
-  const clearCart = () => setCart([]);
+  const removeFromCart = (productId) => {
+    setCart((prev) => prev.filter((i) => i.productId !== productId));
+  };
 
-  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const totalItems = cart.reduce((sum, i) => sum + i.quantity, 0);
 
   return (
     <CartContext.Provider
       value={{
         cart,
         addToCart,
+        selectVariant,
         updateQuantity,
         removeFromCart,
-        clearCart,
+        coupon,
         totalItems,
       }}
     >

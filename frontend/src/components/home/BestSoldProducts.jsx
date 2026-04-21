@@ -43,6 +43,17 @@ export default function BestSoldProducts() {
   const mainProduct = products[0];
   const otherProducts = products.slice(1, 5);
 
+  const handleAddToCart = () => {
+    // ✅ Minimal optimized cart object
+    const productForCart = {
+      _id: mainProduct?._id,
+      name: mainProduct?.name,
+      image: mainProduct?.images?.[0]?.url || "/placeholder.png",
+      variants: mainProduct?.variants,
+    };
+    addToCart(productForCart);
+  };
+
   return (
     <section className="py-20 bg-gray-50">
       <div className="mx-auto max-w-7xl px-4">
@@ -89,7 +100,7 @@ export default function BestSoldProducts() {
               <Button
                 onClick={(e) => {
                   e.stopPropagation();
-                  addToCart(mainProduct);
+                  handleAddToCart();
                 }}
                 size="sm"
                 disabled={getStock(mainProduct.variants) === 0}
@@ -166,7 +177,7 @@ export default function BestSoldProducts() {
               <Button
                 onClick={(e) => {
                   e.stopPropagation();
-                  addToCart(mainProduct);
+                  handleAddToCart();
                 }}
                 size="sm"
                 className="mt-3 bg-pink-500 text-white"
