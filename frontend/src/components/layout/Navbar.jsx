@@ -30,6 +30,7 @@ import Cart from "./Cart";
 const navLinks = [
   { name: "Home", href: "/" },
   { name: "Products", href: "/products" },
+  { name: "Combo", href: "/combo" },
   { name: "About", href: "/about" },
   { name: "Contact", href: "/contact" },
 ];
