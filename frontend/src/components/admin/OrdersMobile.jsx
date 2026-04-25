@@ -8,9 +8,8 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const STATUS = ["pending", "processing", "shipped", "delivered"];
 
-export default function OrdersMobile({ orders, loading, onUpdateStatus }) {
+export default function OrdersMobile({ orders, loading, onUpdateStatus, status, statusStyles }) {
   return (
     <div className="grid gap-4 sm:hidden">
       {loading
@@ -19,22 +18,32 @@ export default function OrdersMobile({ orders, loading, onUpdateStatus }) {
           ))
         : orders.map((o) => (
             <Card key={o._id} className="p-4 space-y-2">
-              <h3 className="font-semibold">{o.user?.name || "Guest"}</h3>
+              <h3 className="font-semibold">{o.customer?.name || "Guest"}</h3>
 
-              <p>৳ {o.totalAmount}</p>
+              <p>৳ {o?.pricing?.total}</p>
 
               <Select
                 value={o.status}
                 onValueChange={(v) => onUpdateStatus(o._id, v)}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <span
+                    className={`px-2 py-1 rounded text-xs ${statusStyles[o.status]}`}
+                  >
+                    {o.status}
+                  </span>
                 </SelectTrigger>
 
                 <SelectContent>
-                  {STATUS.map((s) => (
+                  {status.map((s) => (
                     <SelectItem key={s} value={s}>
-                      {s}
+                      <span
+                        className={`px-2 py-1 rounded text-xs ${
+                          statusStyles[s] || ""
+                        }`}
+                      >
+                        {s}
+                      </span>
                     </SelectItem>
                   ))}
                 </SelectContent>

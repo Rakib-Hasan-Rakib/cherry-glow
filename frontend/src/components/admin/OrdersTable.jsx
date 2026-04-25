@@ -15,9 +15,9 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const STATUS = ["pending", "processing", "shipped", "delivered"];
 
-export default function OrdersTable({ orders, loading, onUpdateStatus }) {
+
+export default function OrdersTable({ orders, loading, onUpdateStatus ,status, statusStyles}) {
   return (
     <div className="hidden sm:block border rounded-lg">
       <Table>
@@ -41,23 +41,33 @@ export default function OrdersTable({ orders, loading, onUpdateStatus }) {
               ))
             : orders.map((o) => (
                 <TableRow key={o._id}>
-                  <TableCell>{o.user?.name || "Guest"}</TableCell>
+                  <TableCell>{o.customer?.name || "Guest"}</TableCell>
 
-                  <TableCell>৳ {o.totalAmount}</TableCell>
+                  <TableCell>৳ {o?.pricing?.total}</TableCell>
 
                   <TableCell>
                     <Select
                       value={o.status}
                       onValueChange={(v) => onUpdateStatus(o._id, v)}
                     >
-                      <SelectTrigger className="w-[130px]">
-                        <SelectValue />
+                      <SelectTrigger className="w-[140px]">
+                        <span
+                          className={`px-2 py-1 rounded text-xs ${statusStyles[o.status]}`}
+                        >
+                          {o.status}
+                        </span>
                       </SelectTrigger>
 
                       <SelectContent>
-                        {STATUS.map((s) => (
+                        {status?.map((s) => (
                           <SelectItem key={s} value={s}>
-                            {s}
+                            <span
+                              className={`px-2 py-1 rounded text-xs ${
+                                statusStyles[s] || ""
+                              }`}
+                            >
+                              {s}
+                            </span>
                           </SelectItem>
                         ))}
                       </SelectContent>
