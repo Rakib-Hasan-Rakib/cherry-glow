@@ -32,8 +32,7 @@ export default function ProductDetailsPage() {
           `${process.env.NEXT_PUBLIC_API_URL}/products/singleProduct/${id}`,
         );
 
-        const data = res.data;
-        setProduct(data);
+        setProduct(res.data);
       } catch (err) {
         console.error(err);
         toast.error("Failed to load product");
@@ -45,17 +44,11 @@ export default function ProductDetailsPage() {
     fetchProduct();
   }, [id]);
 
-  /* ---------------- Normalize Images ---------------- */
+  /* ---------------- Images ---------------- */
   const imageList = useMemo(() => {
     if (!product) return [];
 
-    const imgs = [
-      product.thumbnail,
-      product.image,
-      ...(product.images?.map((i) => i?.url || i) || []),
-    ];
-
-    return [...new Set(imgs.filter(Boolean))];
+    return product.images?.map((i) => i?.url).filter(Boolean) || [];
   }, [product]);
 
   /* ---------------- Default Image ---------------- */
@@ -68,20 +61,15 @@ export default function ProductDetailsPage() {
   /* ---------------- Default Variant ---------------- */
   useEffect(() => {
     if (product?.variants?.length) {
-      const baseVariant =
-        product.variants.find((v) => v.isBase) || product.variants[0];
-
-      setSelectedVariant(baseVariant);
+      setSelectedVariant(product.variants[0]);
     }
   }, [product]);
 
   /* ---------------- Price ---------------- */
   const finalPrice = useMemo(() => {
-    if (!product) return 0;
+    if (!product || !selectedVariant) return 0;
 
-    const base = selectedVariant?.price || product.basePrice;
-
-    if (!product.discountType) return base;
+    const base = selectedVariant.price;
 
     if (product.discountType === "percentage") {
       return Math.round(base - (base * product.discountValue) / 100);
@@ -94,26 +82,29 @@ export default function ProductDetailsPage() {
     return base;
   }, [product, selectedVariant]);
 
-  const originalPrice = selectedVariant?.price || product?.basePrice;
+  const originalPrice = selectedVariant?.price || 0;
+
+  /* ---------------- Stock ---------------- */
+  const stock = selectedVariant?.stock || 0;
 
   /* ---------------- Add To Cart ---------------- */
   const handleAddToCart = () => {
-    if (!product) return;
+    if (!product || !selectedVariant) {
+      return toast.error("Select a variant");
+    }
 
     setAdding(true);
 
-    const productForCart = {
-      _id: product?._id,
-      name: product?.name,
-      image: product?.images[0]?.url || '/placeholder.jpg',
-      variants: product?.variants || [],
-    };
+     const productForCart = {
+       _id: product?._id,
+       name: product?.name,
+       image: product?.images[0]?.url || "/placeholder.jpg",
+       variants: product?.variants || [],
+     };
 
     addToCart(productForCart);
 
-    setTimeout(() => {
-      setAdding(false);
-    }, 400);
+    setTimeout(() => setAdding(false), 400);
   };
 
   if (loading) return <ProductSkeleton />;
@@ -121,12 +112,12 @@ export default function ProductDetailsPage() {
   if (!product)
     return <p className="text-center py-20 text-gray-500">Product not found</p>;
 
-  const { name, brand, category, description, useCase, stock } = product;
+  const { name, brand, category, description, useCase } = product;
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
       <div className="grid md:grid-cols-2 gap-12">
-        {/* ================= IMAGES ================= */}
+        {/* IMAGES */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <div className="relative w-full h-[420px] rounded-2xl bg-white shadow-md overflow-hidden">
             <Image
@@ -143,7 +134,7 @@ export default function ProductDetailsPage() {
             <div className="flex gap-3 mt-4 flex-wrap">
               {imageList.map((img, i) => (
                 <button
-                  key={i}
+                  key={img}
                   onClick={() => setSelectedImage(img)}
                   className={`relative w-20 h-20 rounded-lg overflow-hidden border-2 ${
                     selectedImage === img
@@ -158,7 +149,7 @@ export default function ProductDetailsPage() {
           )}
         </motion.div>
 
-        {/* ================= DETAILS ================= */}
+        {/* DETAILS */}
         <motion.div
           initial={{ x: 40, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -176,7 +167,7 @@ export default function ProductDetailsPage() {
               ৳ {finalPrice}
             </span>
 
-            {product.discountType && (
+            {product.discountType !== "none" && (
               <>
                 <span className="line-through text-gray-400">
                   ৳ {originalPrice}
@@ -206,13 +197,14 @@ export default function ProductDetailsPage() {
               <h3 className="font-semibold mb-2">Select Option</h3>
 
               <div className="flex flex-wrap gap-2">
-                {product.variants.map((v, i) => {
+                {product.variants.map((v) => {
                   const isSelected =
                     selectedVariant?.weight === v.weight &&
                     selectedVariant?.unit === v.unit;
+
                   return (
                     <button
-                      key={i}
+                      key={`${v.weight}-${v.unit}`}
                       onClick={() => setSelectedVariant(v)}
                       className={`px-4 py-2 rounded-full border text-sm transition ${
                         isSelected
@@ -220,8 +212,7 @@ export default function ProductDetailsPage() {
                           : "bg-white text-pink-500 border-pink-500 hover:bg-pink-50"
                       }`}
                     >
-                      {v.weight}
-                      {v.unit && ` ${v.unit}`}
+                      {v.weight} {v.unit}
                     </button>
                   );
                 })}
@@ -257,19 +248,21 @@ export default function ProductDetailsPage() {
   );
 }
 
-/* ---------------- Skeleton ---------------- */
 function ProductSkeleton() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 animate-pulse">
+      {" "}
       <div className="grid md:grid-cols-2 gap-10">
-        <div className="h-[420px] bg-gray-200 rounded-2xl" />
+        {" "}
+        <div className="h-[420px] bg-gray-200 rounded-2xl" />{" "}
         <div className="space-y-4">
-          <div className="h-4 w-24 bg-gray-200 rounded" />
-          <div className="h-8 w-3/4 bg-gray-200 rounded" />
-          <div className="h-6 w-32 bg-gray-200 rounded" />
-          <div className="h-24 bg-gray-200 rounded" />
-        </div>
-      </div>
+          {" "}
+          <div className="h-4 w-24 bg-gray-200 rounded" />{" "}
+          <div className="h-8 w-3/4 bg-gray-200 rounded" />{" "}
+          <div className="h-6 w-32 bg-gray-200 rounded" />{" "}
+          <div className="h-24 bg-gray-200 rounded" />{" "}
+        </div>{" "}
+      </div>{" "}
     </div>
   );
 }

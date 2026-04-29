@@ -66,7 +66,7 @@ export default function CreateProductPage() {
   const addVariant = () => {
     setVariants([
       ...variants,
-      { wi: "", unit: "ml", price: "", stock: "" },
+      { weight: "", unit: "ml", price: "", stock: "" },
     ]);
   };
 
@@ -141,22 +141,19 @@ export default function CreateProductPage() {
         }
       });
 
-      await axios.post(`${API}/addProduct`, formData, {
+      const res = await axios.post(`${API}/addProduct`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
+      toast.success("Product created", {
+        duration: 1000,
+      });
 
-      if (res.status === 201 || res.status === 200) {
-        toast.success("Product created", {
-          duration: 1000,
-        });
-
-        // small delay so user can SEE the toast
-        setTimeout(() => {
-          router.replace("/admin/products");
-        }, 1000);
-      }
+      // small delay so user can SEE the toast
+      setTimeout(() => {
+        router.replace("/admin/products");
+      }, 1000);
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed");
     } finally {
