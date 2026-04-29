@@ -7,7 +7,7 @@ import AuthCard from "@/components/auth/AuthCard";
 import GoogleButton from "@/components/auth/GoogleButton";
 import PasswordInput from "@/components/shared/PasswordInput";
 import axios from "axios";
-import { useRouter,useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 export default function LoginPage() {
@@ -15,12 +15,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [redirectPath, setRedirectPath] = useState("/");
 
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // 🔥 Get redirect path
-  const redirectPath = searchParams.get("redirect") || "/";
+  useEffect(() => {
+    const path = searchParams.get("redirect");
+    if (path) setRedirectPath(path);
+  }, [searchParams]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
