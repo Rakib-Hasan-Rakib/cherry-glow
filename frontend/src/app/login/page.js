@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import AuthCard from "@/components/auth/AuthCard";
 import GoogleButton from "@/components/auth/GoogleButton";
 import PasswordInput from "@/components/shared/PasswordInput";
 import axios from "axios";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 export default function LoginPage() {
@@ -18,12 +18,15 @@ export default function LoginPage() {
   const [redirectPath, setRedirectPath] = useState("/");
 
   const router = useRouter();
-  const searchParams = useSearchParams();
 
+  // ✅ SAFE: no useSearchParams
   useEffect(() => {
-    const path = searchParams.get("redirect");
-    if (path) setRedirectPath(path);
-  }, [searchParams]);
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const path = params.get("redirect");
+      if (path) setRedirectPath(path);
+    }
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -45,11 +48,11 @@ export default function LoginPage() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        },
+        }
       );
 
-      router.push(redirectPath);
       toast.success("Login successful!");
+      router.push(redirectPath);
     } catch (err) {
       toast.error("Login failed. Please check your credentials.");
       setError(err.response?.data || err.message);
