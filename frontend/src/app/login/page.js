@@ -11,22 +11,21 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 export default function LoginPage() {
+  const [mounted, setMounted] = useState(false);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [redirectPath, setRedirectPath] = useState("/");
 
   const router = useRouter();
 
-  // ✅ SAFE: no useSearchParams
+  // ✅ Prevent prerender issues
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const path = params.get("redirect");
-      if (path) setRedirectPath(path);
-    }
+    setMounted(true);
   }, []);
+
+  if (!mounted) return null;
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -34,13 +33,9 @@ export default function LoginPage() {
     setError("");
 
     try {
-      // 🔐 Firebase Login
       const res = await signInWithEmailAndPassword(auth, email, password);
-
-      // 🎟️ Get Token
       const token = await res.user.getIdToken();
 
-      // 🔗 Sync with Backend
       await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/api/auth/sync`,
         {},
@@ -48,11 +43,11 @@ export default function LoginPage() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       toast.success("Login successful!");
-      router.push(redirectPath);
+      router.push("/"); // ✅ Always go home
     } catch (err) {
       toast.error("Login failed. Please check your credentials.");
       setError(err.response?.data || err.message);
