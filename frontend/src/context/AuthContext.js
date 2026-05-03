@@ -33,7 +33,7 @@ export function AuthProvider({ children }) {
           email: firebaseUser.email,
           name: firebaseUser.displayName,
           photoURL: firebaseUser.photoURL,
-          role: dbUser.role, // ✅ IMPORTANT
+          role: dbUser?.role, // ✅ IMPORTANT
         });
       } else {
         setUser(null);

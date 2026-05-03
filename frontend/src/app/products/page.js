@@ -5,7 +5,6 @@ import ProductCard from "@/components/products/ProductCard";
 import SkeletonCard from "@/components/products/SkeletonCard";
 import { Input } from "@/components/ui/input";
 import { useCart } from "@/context/CartContext";
-import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import axios from "axios";
@@ -24,9 +23,6 @@ const CATEGORIES = [
 
 export default function ProductsPage() {
   const { addToCart } = useCart();
-  const searchParams = useSearchParams();
-
-  const urlCategory = searchParams.get("category") || "All";
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,9 +30,18 @@ export default function ProductsPage() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  const [category, setCategory] = useState(urlCategory);
+  const [category, setCategory] = useState("All");
 
   const API = `${process.env.NEXT_PUBLIC_API_URL}/products`;
+
+  /* ---------------- Get category from URL (SAFE) ---------------- */
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const cat = params.get("category");
+      if (cat) setCategory(cat);
+    }
+  }, []);
 
   /* ---------------- Debounce ---------------- */
   useEffect(() => {
